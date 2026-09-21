@@ -1,0 +1,2186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Uplink · Estudio de Redes y Ciberseguridad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E1420;
+    --panel:#161F30;
+    --panel-2:#1D2A40;
+    --line:#2A3A54;
+    --text:#E8EDF6;
+    --muted:#8CA0C0;
+    --accent:#4FE0C4;
+    --accent-dim:#2C5F58;
+    --amber:#F2A65A;
+    --danger:#F27B6B;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* ---------- Header ---------- */
+  header{
+    flex:0 0 auto;
+    padding:16px 16px 10px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#111827,var(--ink));
+  }
+  .brand{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .brand h1{
+    font-size:19px;margin:0;letter-spacing:0.3px;font-weight:700;
+  }
+  .brand h1 span{color:var(--muted);font-weight:500;font-size:12px;display:block;margin-top:2px;}
+  .signal{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 0 rgba(79,224,196,.6);
+    animation:pulse 2.4s infinite;
+    flex:0 0 auto;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(79,224,196,.55);}
+    70%{box-shadow:0 0 0 8px rgba(79,224,196,0);}
+    100%{box-shadow:0 0 0 0 rgba(79,224,196,0);}
+  }
+  .chips{
+    display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;
+    scrollbar-width:none;
+  }
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    padding:6px 12px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    font-size:12.5px;
+    color:var(--muted);
+    background:var(--panel);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:border-color .15s, color .15s;
+  }
+  .chip.active{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  /* ---------- Main ---------- */
+  main{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:16px 16px 90px;
+  }
+  .empty{
+    text-align:center;color:var(--muted);padding:40px 10px;font-size:14px;
+  }
+
+  /* ---------- Glossary ---------- */
+  .search{
+    width:100%;padding:11px 14px;border-radius:var(--radius);
+    border:1px solid var(--line);background:var(--panel);
+    color:var(--text);font-family:inherit;font-size:14px;margin-bottom:14px;
+  }
+  .search:focus{outline:none;border-color:var(--accent);}
+  .module-group{margin-bottom:6px;}
+  .module-title{
+    font-size:11.5px;color:var(--muted);margin:18px 0 8px;
+    font-family:'JetBrains Mono',monospace;
+    display:flex;align-items:center;gap:8px;
+  }
+  .module-title::after{content:"";flex:1;height:1px;background:var(--line);}
+  .term-row{
+    border-bottom:1px solid var(--line);
+    padding:12px 2px;
+  }
+  .term-row:last-child{border-bottom:none;}
+  .term-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    cursor:pointer;
+  }
+  .term-name{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--amber);font-size:15px;}
+  .term-full{color:var(--muted);font-size:12px;margin-top:2px;}
+  .term-body{
+    max-height:0;overflow:hidden;transition:max-height .25s ease;
+  }
+  .term-body.open{max-height:2000px;margin-top:10px;}
+  .term-def{font-size:14px;line-height:1.6;color:var(--text);margin-bottom:8px;white-space:pre-wrap;}
+  .term-ex{
+    font-size:13px;color:var(--muted);
+    border-left:2px solid var(--accent-dim);
+    padding-left:10px;line-height:1.6;white-space:pre-wrap;
+  }
+
+  /* ---------- Flashcards ---------- */
+  .fc-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:8px;}
+  .fc-progress{color:var(--muted);font-size:12.5px;font-family:'JetBrains Mono',monospace;}
+  .fc-card{
+    width:100%;max-width:420px;min-height:300px;
+    perspective:1200px;
+    cursor:pointer;
+  }
+  .fc-inner{
+    position:relative;width:100%;height:100%;min-height:300px;
+    transform-style:preserve-3d;
+    transition:transform .5s;
+  }
+  .fc-card.flipped .fc-inner{transform:rotateY(180deg);}
+  .fc-face{
+    position:absolute;inset:0;
+    border-radius:14px;border:1px solid var(--line);
+    background:var(--panel);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;
+    backface-visibility:hidden;
+  }
+  .fc-face.back{
+    transform:rotateY(180deg);
+    background:var(--panel-2);
+    align-items:flex-start;text-align:left;justify-content:flex-start;
+    overflow-y:auto;
+  }
+  .fc-tag{
+    font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace;
+    margin-bottom:14px;
+  }
+  .fc-term{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:26px;color:var(--amber);}
+  .fc-full{color:var(--muted);font-size:13px;margin-top:8px;}
+  .fc-hint{color:var(--muted);font-size:11.5px;margin-top:18px;}
+  .fc-def{font-size:14px;line-height:1.6;margin-bottom:10px;white-space:pre-wrap;}
+  .fc-ex{font-size:13px;color:var(--muted);border-left:2px solid var(--accent-dim);padding-left:10px;line-height:1.6;white-space:pre-wrap;}
+  .fc-controls{display:flex;gap:10px;width:100%;max-width:420px;}
+  .btn{
+    flex:1;padding:12px;border-radius:var(--radius);border:1px solid var(--line);
+    background:var(--panel);color:var(--text);font-family:inherit;font-size:14px;
+    cursor:pointer;font-weight:500;
+  }
+  .btn.primary{background:var(--accent);color:#08201B;border-color:var(--accent);font-weight:600;}
+  .btn.ghost{background:transparent;}
+  .btn.danger-outline{border-color:var(--danger);color:var(--danger);background:transparent;}
+  .btn:active{transform:scale(.98);}
+
+  /* ---------- Quiz ---------- */
+  .quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted);}
+  .quiz-q{font-size:16px;line-height:1.5;margin-bottom:18px;white-space:pre-wrap;}
+  .quiz-q .mono{color:var(--amber);}
+  .qopt{
+    display:block;width:100%;text-align:left;
+    padding:13px 14px;margin-bottom:10px;border-radius:var(--radius);
+    border:1px solid var(--line);background:var(--panel);color:var(--text);
+    font-family:inherit;font-size:14px;cursor:pointer;line-height:1.4;
+  }
+  .qopt.correct{border-color:var(--accent);background:rgba(79,224,196,.12);}
+  .qopt.wrong{border-color:var(--danger);background:rgba(242,123,107,.12);}
+  .qopt:disabled{cursor:default;}
+  .quiz-result{text-align:center;padding-top:30px;}
+  .quiz-result .score{font-family:'JetBrains Mono',monospace;font-size:44px;color:var(--accent);font-weight:700;}
+
+  /* ---------- Add content ---------- */
+  .section-label{font-size:13px;color:var(--muted);margin:22px 0 10px;font-family:'JetBrains Mono',monospace;}
+  .section-label:first-child{margin-top:0;}
+  textarea, input[type=text]{
+    width:100%;padding:12px 14px;border-radius:var(--radius);
+    border:1px solid var(--line);background:var(--panel);color:var(--text);
+    font-family:inherit;font-size:14px;resize:vertical;
+  }
+  textarea:focus, input[type=text]:focus, select:focus{outline:none;border-color:var(--accent);}
+  select{
+    width:100%;padding:12px 14px;border-radius:var(--radius);
+    border:1px solid var(--line);background:var(--panel);color:var(--text);
+    font-family:inherit;font-size:14px;
+  }
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+  .preview-card{
+    border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;
+    background:var(--panel);
+  }
+  .preview-card .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .preview-card .ph label{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;color:var(--amber);font-weight:700;font-size:14px;}
+  .preview-card input[type=text]{margin-bottom:6px;font-size:13px;padding:8px 10px;}
+  .status-msg{font-size:13px;color:var(--muted);text-align:center;padding:16px 0;}
+  .status-msg.err{color:var(--danger);}
+  .toggle-manual{
+    background:none;border:none;color:var(--accent);font-family:inherit;font-size:13px;
+    cursor:pointer;padding:0;margin-bottom:16px;text-decoration:underline;
+  }
+  hr.sep{border:none;border-top:1px solid var(--line);margin:22px 0;}
+
+  /* ---------- Bottom nav ---------- */
+  nav{
+    position:fixed;bottom:0;left:0;right:0;
+    display:flex;
+    background:var(--panel);
+    border-top:1px solid var(--line);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  }
+  .navbtn{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+    background:none;border:none;color:var(--muted);font-family:inherit;font-size:11px;
+    cursor:pointer;padding:6px 0;
+  }
+  .navbtn.active{color:var(--accent);}
+  .navbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+  .loader{
+    display:inline-block;width:16px;height:16px;border:2px solid var(--line);
+    border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;
+    vertical-align:middle;margin-right:8px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div>
+      <h1>UPLINK<span>Redes &amp; Ciberseguridad</span></h1>
+    </div>
+    <div class="signal" title="listo"></div>
+  </div>
+  <p id="moduleHint" style="font-size:11.5px;color:var(--muted);margin:0 0 8px;"></p>
+  <div class="chips" id="moduleChips"></div>
+</header>
+
+<main id="main"></main>
+
+<nav>
+  <button class="navbtn active" data-tab="glosario">
+    <svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h11v18H6a2 2 0 0 1-2-2V5Z"/><path d="M17 3v18"/><path d="M8 8h5M8 12h5"/></svg>
+    Glosario
+  </button>
+  <button class="navbtn" data-tab="cards">
+    <svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 6V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/></svg>
+    Tarjetas
+  </button>
+  <button class="navbtn" data-tab="quiz">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.7-2.4 3.4"/><path d="M12 17h.01"/></svg>
+    Quiz
+  </button>
+  <button class="navbtn" data-tab="add">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Añadir
+  </button>
+</nav>
+
+<script>
+/* ============ SEED DATA ============ */
+const MODULES = [
+  "Bloque 1 · Hardware y Sistemas",
+  "Bloque 2 · Redes y Protocolos",
+  "Bloque 3 · Seguridad e Identidad",
+  "Bloque 4 · Auditoría y Herramientas",
+  "Bloque 5 · Riesgos y Ataques",
+  "Bloque 6 · Continuidad y Normativa",
+  "Bloque 7 · Profesión"
+];
+
+const SEED_DATA = [
+  {
+    "term": "Procesador",
+    "full": "",
+    "definition": "¿Qué es?\nEl procesador es como el cerebro del ordenador. Es la pieza principal que recibe las instrucciones de los programas y hace los cálculos matemáticos y lógicos necesarios para que el equipo funcione.\n\n¿Para qué sirve?\nSirve para coordinar el resto de los componentes del ordenador y ejecutar las tareas que le pedimos.\n\nSe relaciona con:\nPrograma → CPU → cálculo → resultado",
+    "example": "Ejemplo:\nSi abres la calculadora y escribes \"25 + 25\", el procesador recibe esos números, realiza la operación y envía la orden para que veas el resultado en la pantalla.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "CPU",
+    "full": "Central Processing Unit",
+    "definition": "¿Qué es?\nLa CPU es la parte principal del procesador. Es la encargada de ejecutar las instrucciones normales del sistema operativo y de los programas que utilizas cada día.\n\n¿Para qué sirve?\nRealiza los cálculos de propósito general que permiten abrir aplicaciones, escribir documentos o navegar por Internet.\n\nSe relaciona con:\nCPU → RAM → Almacenamiento",
+    "example": "Ejemplo:\nCuando haces doble clic en el icono de un navegador web, la CPU se encarga de procesar todas las órdenes necesarias para que el programa se abra correctamente.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Núcleos del procesador",
+    "full": "",
+    "definition": "¿Qué es?\nUn núcleo es como un pequeño procesador independiente dentro del procesador principal. Cada núcleo puede ejecutar una tarea distinta al mismo tiempo.\n\n¿Para qué sirve?\nPermite que el ordenador pueda hacer muchas cosas a la vez sin quedarse bloqueado (multitarea).\n\nSe relaciona con:\nProcesador → contiene varios núcleos",
+    "example": "Ejemplo:\nNúcleo 1 → Carga una página web.\nNúcleo 2 → Reproduce música.\nNúcleo 3 → Analiza el sistema con el antivirus.\nNúcleo 4 → Mantiene un juego funcionando.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Hyper-Threading / SMT",
+    "full": "Simultaneous Multi-Threading",
+    "definition": "¿Qué es?\nEs una tecnología que engaña al sistema operativo para que cada núcleo físico del procesador pueda hacer el trabajo de dos, dividiendo sus recursos (hilos lógicos).\n\n¿Para qué sirve?\nSirve para aprovechar al máximo el tiempo de cálculo del procesador, haciendo que el equipo rinda mejor cuando hay muchos programas abiertos.\n\nDiferencia clave:\nNúcleo = pieza física.\nHilo (Thread) = canal virtual de trabajo.",
+    "example": "Ejemplo:\nSi compras un procesador de 6 núcleos con Hyper-Threading, el sistema operativo (como Windows) pensará que tienes 12 procesadores lógicos para repartir el trabajo.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Memoria RAM",
+    "full": "Random Access Memory",
+    "definition": "¿Qué es?\nEs la memoria temporal y ultrarrápida del ordenador. Allí se guarda la información de los programas que estás utilizando en este momento exacto. Es volátil, lo que significa que se borra completamente al apagar el equipo.\n\n¿Para qué sirve?\nSirve para que el procesador pueda acceder casi al instante a los datos que necesita ahora mismo, sin tener que buscarlos en el disco duro, que es mucho más lento.\n\nSe relaciona con:\nDisco duro → guarda permanentemente\nRAM → guarda temporalmente",
+    "example": "Ejemplo:\nAbres Chrome, Word y un juego. Toda esa información pasa del disco duro a la RAM. Si de repente se va la luz y el ordenador se apaga, todo lo que estaba en la RAM y no guardaste se pierde.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Controlador de memoria",
+    "full": "",
+    "definition": "¿Qué es?\nEs el componente encargado de dirigir el tráfico de datos entre el procesador y la memoria RAM.\n\n¿Para qué sirve?\nSirve para organizar a qué velocidad y en qué canales viaja la información, evitando atascos de datos.\n\nSe relaciona con:\nCPU ↔ controlador de memoria ↔ RAM",
+    "example": "Ejemplo:\nEl procesador pide un dato urgente a la RAM. El controlador de memoria localiza ese dato, lo extrae y se lo entrega rápidamente al procesador.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Caché L1, L2 y L3",
+    "full": "",
+    "definition": "¿Qué es?\nSon unas memorias extremadamente pequeñas y rápidas que están construidas dentro del propio procesador. \nL1 es la más pequeña y rápida. L2 es intermedia. L3 es la más grande y normalmente se comparte entre todos los núcleos.\n\n¿Para qué sirve?\nEvita que el procesador tenga que ir hasta la RAM a buscar los datos que usa constantemente, ahorrando mucho tiempo.",
+    "example": "Ejemplo:\nPiensa en buscar un bolígrafo:\nL1 = Lo tienes en la mano.\nL2 = Lo tienes sobre tu mesa.\nL3 = Lo tienes en un cajón de tu habitación.\nRAM = Tienes que ir a buscarlo a otra habitación.\nCuanto más cerca está el dato (L1), más rápido trabaja el ordenador.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "GPU integrada",
+    "full": "Graphics Processing Unit",
+    "definition": "¿Qué es?\nEs un chip encargado de procesar gráficos (imágenes y vídeos) que viene directamente incrustado dentro del mismo chip del procesador, en lugar de ser una tarjeta separada.\n\n¿Para qué sirve?\nSirve para mostrar la pantalla, ver vídeos y ejecutar juegos básicos sin necesidad de comprar una tarjeta gráfica cara dedicada.\n\nDiferencia clave:\nGPU integrada → comparte memoria con la RAM del sistema.\nTarjeta gráfica dedicada → tiene su propia memoria ultrarrápida.",
+    "example": "Ejemplo:\nEn un portátil de instituto, la GPU integrada permite que puedas usar Windows y ver vídeos de YouTube perfectamente, ahorrando batería y espacio.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "NPU",
+    "full": "Neural Processing Unit",
+    "definition": "¿Qué es?\nEs un chip especializado diseñado únicamente para realizar cálculos relacionados con inteligencia artificial y redes neuronales.\n\n¿Para qué sirve?\nSirve para ejecutar herramientas de IA directamente en tu ordenador (como traducir voz a texto o desenfocar fondos en videollamadas) de forma rapidísima y gastando muy poca batería.\n\nSe relaciona con:\nCPU → tareas generales\nGPU → gráficos\nNPU → inteligencia artificial",
+    "example": "Ejemplo:\nSi usas una herramienta de IA para eliminar el ruido de fondo de tu micrófono durante una llamada, la NPU hace ese trabajo para que la CPU no se ralentice.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Controladores de E/S",
+    "full": "Entrada/Salida (Input/Output)",
+    "definition": "¿Qué es?\nSon los componentes que gestionan las conexiones entre el procesador y todos los aparatos externos o periféricos (como discos duros, pendrives, teclado o ratón).\n\n¿Para qué sirve?\nSirven para traducir y dirigir la información que entra (Entrada) desde el ratón o teclado, y la que sale (Salida) hacia un pendrive o una pantalla.\n\nSe relaciona con:\nCPU → controlador E/S → puerto USB → teclado",
+    "example": "Ejemplo:\nConectas un pendrive al ordenador. El controlador de E/S detecta que lo has enchufado y prepara el camino de datos para que puedas copiar archivos rápidamente.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Motor de vídeo",
+    "full": "",
+    "definition": "¿Qué es?\nEs una sección específica del procesador dedicada en exclusiva a comprimir y descomprimir vídeo (codificador/decodificador).\n\n¿Para qué sirve?\nPermite reproducir películas de muy alta calidad (como 4K) de manera fluida y sin que la batería del portátil se agote rápido.\n\nSe relaciona con:\nFormatos de vídeo (H.264, H.265) → Motor de vídeo → Pantalla",
+    "example": "Ejemplo:\nCuando ves una película en Netflix a máxima calidad, el motor de vídeo se encarga de traducirla a imágenes. Si tuviera que hacerlo la CPU normal, el ordenador se calentaría mucho más.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Overclocking",
+    "full": "",
+    "definition": "¿Qué es?\nEs una técnica manual donde el usuario obliga a un componente (normalmente el procesador o la tarjeta gráfica) a trabajar a una velocidad mayor que la que el fabricante estableció de fábrica.\n\n¿Para qué sirve?\nSirve para conseguir más rendimiento y velocidad gratis en juegos o programas pesados.\n\nConsecuencia:\nProduce mucho más calor y consumo eléctrico. Si no se enfría bien, puede romper el equipo o hacer que se cuelgue.",
+    "example": "Ejemplo:\nTienes un procesador diseñado para ir a 3,6 GHz. Entras en la configuración y lo fuerzas para que funcione a 4,2 GHz. Irá más rápido, pero necesitarás un ventilador mucho más potente.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "TPM",
+    "full": "Trusted Platform Module",
+    "definition": "¿Qué es?\nEs un pequeño chip de seguridad soldado en la placa base (o integrado en el procesador) que funciona como una caja fuerte para el ordenador.\n\n¿Para qué sirve?\nSirve para guardar claves criptográficas de forma segura, comprobar que el hardware no ha sido alterado y es un requisito obligatorio para usar sistemas como Windows 11 o cifrar el disco duro.\n\nSe relaciona con:\nTPM → clave de cifrado → BitLocker",
+    "example": "Ejemplo:\nCifras el disco duro de tu portátil con BitLocker. La llave para poder leer ese disco se guarda en el chip TPM. Si un ladrón roba solo el disco duro y lo conecta a otro ordenador, no podrá leer nada porque le falta tu chip TPM.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "BIOS / UEFI",
+    "full": "Basic Input/Output System / Unified Extensible Firmware Interface",
+    "definition": "¿Qué es?\nEs el primer programa básico (firmware) que arranca al encender el equipo, incluso antes de que aparezca el sistema operativo (como Windows o Linux). UEFI es la versión moderna de la antigua BIOS.\n\n¿Para qué sirve?\nComprueba que todas las piezas físicas funcionan bien (teclado, memoria, disco) y luego busca el sistema operativo para entregarle el control del ordenador.\n\nProcedimiento:\nEncender el PC → UEFI revisa el hardware → UEFI carga el arranque del disco → Inicia Windows",
+    "example": "Ejemplo:\nSi enciendes el PC y presionas rápidamente la tecla Suprimir o F2, entras a un menú azul o gráfico. Eso es la BIOS/UEFI. Desde ahí puedes decirle al PC, por ejemplo, que arranque desde un pendrive USB en vez del disco duro.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Secure Boot",
+    "full": "Arranque seguro",
+    "definition": "¿Qué es?\nEs una función de seguridad integrada en la UEFI que vigila el proceso de encendido del ordenador.\n\n¿Para qué sirve?\nSirve para asegurar que el sistema operativo y los programas de arranque que se están cargando sean legítimos y estén firmados digitalmente. Evita que un virus muy peligroso (bootkit) se cargue antes que el sistema operativo.\n\nSe relaciona con:\nUEFI → Secure Boot → Windows",
+    "example": "Ejemplo:\nUn virus intenta esconderse en el sector de arranque de tu disco duro. Al encender, Secure Boot detecta que ese virus no tiene una firma digital válida de Microsoft, así que bloquea el arranque y te protege.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "AMD SEV / Intel SGX",
+    "full": "Secure Encrypted Virtualization / Software Guard Extensions",
+    "definition": "¿Qué es?\nSon tecnologías de seguridad incluidas en los procesadores que crean \"burbujas\" (enclaves) totalmente aisladas dentro de la memoria RAM.\n\n¿Para qué sirve?\nPermite ejecutar programas con datos ultra sensibles de modo que ni otros programas, ni siquiera el sistema operativo o el administrador del equipo, puedan espiarlos.\n\nSe relaciona con:\nProcesador → aislamiento en hardware → seguridad de datos en memoria",
+    "example": "Ejemplo:\nUn banco utiliza servidores alquilados en la nube. Gracias a Intel SGX, pueden procesar las contraseñas de los clientes en una burbuja protegida, de modo que ni siquiera el dueño del servidor (por ejemplo, Google o Amazon) puede ver esos datos.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Intel ME / AMD PSP",
+    "full": "Management Engine / Platform Security Processor",
+    "definition": "¿Qué es?\nSon unos pequeños procesadores ocultos dentro del procesador principal. Tienen su propio sistema operativo invisible para el usuario.\n\n¿Para qué sirve?\nLos fabricantes los utilizan para funciones de seguridad, gestión de claves (como un TPM por software) y para que los informáticos de una empresa puedan arreglar el PC en remoto incluso si está apagado.\n\nRiesgo asociado:\nTienen tanto poder sobre el ordenador que, si tienen una vulnerabilidad, un atacante podría controlar todo el equipo de forma indetectable.",
+    "example": "Ejemplo:\nUn trabajador está en su casa con el portátil de la empresa apagado. El informático de la empresa puede conectarse al Intel ME del portátil a través de la red, encenderlo de forma remota e instalarle actualizaciones.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Kill switch remoto",
+    "full": "Interruptor de apagado remoto",
+    "definition": "¿Qué es?\nEs una función de seguridad corporativa que permite a un administrador inutilizar un ordenador a distancia mediante una orden por red.\n\n¿Para qué sirve?\nSirve para proteger los datos de una empresa si un empleado pierde el portátil o se lo roban. \n\nProcedimiento:\nPortátil robado se conecta a Internet → Administrador manda orden → Hardware recibe la orden → Bloquea el encendido o borra el disco",
+    "example": "Ejemplo:\nAlguien roba un portátil de la empresa y le quita el disco duro para ponerle uno nuevo. Como el Kill Switch actúa a nivel de placa base, cuando el ladrón lo encienda, el ordenador se bloqueará y no servirá para nada.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "MBR",
+    "full": "Master Boot Record",
+    "definition": "¿Qué es?\nEs el sistema antiguo que se usaba para organizar cómo se dividía un disco duro y cómo debía arrancar el ordenador.\n\n¿Para qué sirve?\nLe dice a la antigua BIOS en qué parte del disco está el sistema operativo.\n\nLimitaciones:\nSolo soporta discos duros de hasta 2 Terabytes (TB) y permite como máximo crear 4 particiones primarias.",
+    "example": "Ejemplo:\nSi encuentras un ordenador con Windows 7 muy viejo de hace 15 años, lo más probable es que su disco duro esté configurado utilizando MBR.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "GPT",
+    "full": "GUID Partition Table",
+    "definition": "¿Qué es?\nEs el sistema moderno y actual para estructurar y dividir los discos duros, diseñado para reemplazar al antiguo MBR.\n\n¿Para qué sirve?\nOrganiza las partes del disco y permite trabajar con discos gigantescos (de muchísimos Terabytes) y crear más de cien particiones distintas en un mismo disco.\n\nSe relaciona con:\nUEFI → requiere discos en formato GPT para funcionar correctamente.",
+    "example": "Ejemplo:\nTe compras un disco duro nuevo de 4 Terabytes para tu ordenador moderno. Para poder utilizar todo ese espacio sin perder la mitad, tienes que inicializar el disco utilizando GPT.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Particiones",
+    "full": "",
+    "definition": "¿Qué es?\nEs una división lógica o imaginaria que se hace dentro de un mismo disco duro físico. El ordenador tratará cada partición como si fuera un disco independiente.\n\n¿Para qué sirve?\nPara separar y organizar los datos, por ejemplo, tener el sistema operativo en una zona y las fotos personales en otra.\n\nSe relaciona con:\nDisco duro (1 pieza física) → MBR/GPT → Partición C: y Partición D: (2 unidades lógicas)",
+    "example": "Ejemplo:\nTienes un único disco duro, pero en \"Mi PC\" ves el Disco (C:) donde está Windows y el Disco (D:) donde guardas tus juegos. Son dos particiones del mismo disco.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Partición de recuperación",
+    "full": "Recovery Partition",
+    "definition": "¿Qué es?\nEs una partición oculta especial en el disco duro que los fabricantes (como HP, Dell o Lenovo) incluyen de fábrica.\n\n¿Para qué sirve?\nContiene una copia exacta de Windows y de todos los programas originales. Sirve para formatear y arreglar el equipo automáticamente si Windows se rompe, devolviéndolo a como estaba el primer día.\n\nSe relaciona con:\nProblema grave en Windows → usar partición de recuperación → PC como nuevo",
+    "example": "Ejemplo:\nTu portátil va muy lento porque está lleno de virus. Entras en el menú de reparación y pulsas \"Restaurar al estado de fábrica\". El ordenador saca los datos limpios de la partición de recuperación y reinstala todo solo.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Clave OEM",
+    "full": "Original Equipment Manufacturer",
+    "definition": "¿Qué es?\nEs una licencia de Windows que viene atada para siempre a un ordenador específico cuando lo compras en la tienda.\n\n¿Para qué sirve?\nSirve para activar Windows de forma legal, pero con la limitación de que no puedes llevarte esa misma licencia a un ordenador nuevo que te montes tú.\n\nDato importante:\nEn los equipos modernos, esta clave no viene en una pegatina, viene grabada directamente dentro de la placa base (en el firmware UEFI).",
+    "example": "Ejemplo:\nFormateas tu portátil y vuelves a instalar Windows 11. No hace falta que escribas ningún número de serie; el instalador lee la clave OEM guardada en la placa base y se activa automáticamente.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "FAT32",
+    "full": "File Allocation Table 32",
+    "definition": "¿Qué es?\nEs un sistema de archivos muy antiguo pero que todos los dispositivos del mundo entienden.\n\n¿Para qué sirve?\nSirve para dar formato a pendrives y memorias SD asegurando que funcionen en cualquier sitio: un Mac, un PC con Windows, una tele, la radio del coche o una consola.\n\nLimitación principal:\nNo permite guardar ningún archivo individual que pese más de 4 Gigabytes (GB).",
+    "example": "Ejemplo:\nTienes un pendrive en FAT32 e intentas copiarle una película en 4K que ocupa 6 GB. El ordenador te dirá que \"el archivo es demasiado grande\", aunque el pendrive tenga 32 GB libres en total.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "NTFS",
+    "full": "New Technology File System",
+    "definition": "¿Qué es?\nEs el sistema de archivos oficial y moderno que utiliza Windows para organizar los datos en sus discos duros internos.\n\n¿Para qué sirve?\nPermite manejar discos enormes, archivos de cualquier tamaño (sin el límite de 4 GB), establecer permisos de seguridad (quién puede leer una carpeta) y cifrar datos.\n\nDiferencia clave:\nFAT32 = Universal, pero básico y con límite de tamaño.\nNTFS = Moderno y seguro, pero exclusivo principalmente de Windows.",
+    "example": "Ejemplo:\nEl disco (C:) donde tienes instalado tu Windows 11 siempre estará formateado en NTFS para poder utilizar todas las medidas de seguridad y gestionar archivos grandes del sistema.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "ext4",
+    "full": "Fourth Extended Filesystem",
+    "definition": "¿Qué es?\nEs el sistema de archivos estándar más utilizado en el mundo del sistema operativo Linux.\n\n¿Para qué sirve?\nHace la misma función que NTFS en Windows, pero está diseñado para que Linux organice los archivos de forma ultra eficiente y rápida, evitando que el disco se fragmente (se desordene).\n\nSe relaciona con:\nWindows → NTFS\nLinux → ext4",
+    "example": "Ejemplo:\nSi instalas el sistema operativo Ubuntu (que es Linux) en tu ordenador, el instalador formateará la partición principal usando el sistema ext4.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "RAID",
+    "full": "Redundant Array of Independent Disks",
+    "definition": "¿Qué es?\nEs una tecnología que agrupa varios discos duros físicos distintos y los hace trabajar juntos para que el sistema operativo crea que son un único disco gigante.\n\n¿Para qué sirve?\nDependiendo de cómo se configure, sirve para sumar la velocidad de los discos o para hacer copias espejo y que no se pierdan datos si un disco se rompe.\n\nEjemplo RAID 1 (Espejo):\nDisco A recibe un archivo → automáticamente se hace una copia idéntica en el Disco B.",
+    "example": "Ejemplo:\nUn servidor web usa RAID 1 con dos discos. De repente, el Disco A se quema y echa humo. Como el Disco B es un espejo exacto, el servidor sigue funcionando perfectamente sin que se caiga la página web.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "TIER I",
+    "full": "Nivel de CPD I",
+    "definition": "¿Qué es?\nEs la clasificación más baja para un Centro de Procesamiento de Datos (CPD, un edificio lleno de servidores). Significa que tiene una infraestructura básica.\n\n¿Para qué sirve?\nSirve para empresas pequeñas que pueden permitirse que sus sistemas dejen de funcionar ocasionalmente.\n\nCaracterística:\nNo tiene elementos redundantes (repetidos o de reserva). Si falla la corriente eléctrica o el aire acondicionado, los servidores se apagan.",
+    "example": "Ejemplo:\nLa pequeña sala de servidores de un colegio. Si hay un corte de luz en el barrio, la web del colegio dejará de funcionar hasta que vuelva la electricidad.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "TIER II",
+    "full": "Nivel de CPD II",
+    "definition": "¿Qué es?\nEs el segundo nivel en la clasificación de un Centro de Procesamiento de Datos. Añade componentes redundantes (de reserva) a la infraestructura básica.\n\n¿Para qué sirve?\nSirve para reducir el riesgo de caídas.\n\nCaracterística:\nTienen piezas de repuesto preparadas, como generadores de electricidad extra o sistemas de frío de repuesto, pero siguen utilizando un solo cableado general. Si ese cable principal falla, el sistema se cae.",
+    "example": "Ejemplo:\nUna empresa mediana tiene su servidor en un CPD TIER II. Tienen un generador diésel por si se va la luz, pero solo tienen un cuadro de distribución eléctrica. Si ese cuadro se avería, los servidores se apagarán igual.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "TIER III",
+    "full": "Nivel de CPD III",
+    "definition": "¿Qué es?\nEs un nivel muy alto de Centro de Procesamiento de Datos. Su característica principal es que permite el \"mantenimiento concurrente\".\n\n¿Para qué sirve?\nSignifica que los técnicos pueden apagar cables, revisar generadores o arreglar tuberías sin tener que apagar los servidores en ningún momento.\n\nSe relaciona con:\nHay rutas de cableado alternativas preparadas: si se apaga el Camino A, la electricidad pasa inmediatamente por el Camino B.",
+    "example": "Ejemplo:\nUna empresa grande necesita revisar el sistema eléctrico principal. En un TIER III desvían la corriente por un cable alternativo, hacen la revisión y los ordenadores siguen funcionando sin notar nada.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "TIER IV",
+    "full": "Nivel de CPD IV",
+    "definition": "¿Qué es?\nEs el máximo nivel de seguridad física para un Centro de Datos. Busca la tolerancia total a fallos utilizando sistemas independientes.\n\n¿Para qué sirve?\nSirve para servicios que no pueden caerse nunca bajo ninguna circunstancia, como bancos o sistemas militares.\n\nCaracterística:\nTodo está físicamente duplicado y aislado (sistema A funcionando, sistema B preparado de forma autónoma). Un error o incendio en un lado no interrumpe el servicio.",
+    "example": "Ejemplo:\nEl centro de datos de un banco gigante es TIER IV. Si una retroexcavadora corta un cable eléctrico de la ciudad que alimenta el edificio y un transformador explota dentro, las instalaciones duplicadas toman el control sin que se corte una sola transacción bancaria.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  }
+];
+SEED_DATA.push(
+  {
+    "term": "Triada CIA",
+    "full": "Confidencialidad, Integridad y Disponibilidad",
+    "definition": "¿Qué es?\nEs el modelo básico de la seguridad de la información. Establece que los datos deben ser secretos (Confidencialidad), exactos y no alterados (Integridad) y siempre accesibles (Disponibilidad).\n\n¿Para qué sirve?\nSirve como guía para saber qué debemos proteger en un sistema. Cualquier ataque informático intenta romper al menos una de estas tres características.\n\nSe relaciona con:\nConfidencialidad → Cifrado\nIntegridad → Hash\nDisponibilidad → Backups",
+    "example": "Ejemplo:\nUn banco necesita que no veas la cuenta de tu vecino (Confidencialidad), que nadie cambie tu saldo de 100€ a 0€ (Integridad) y que puedas entrar a la app bancaria a cualquier hora (Disponibilidad).",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Backup completo",
+    "full": "Copia de seguridad completa",
+    "definition": "¿Qué es?\nEs una copia de seguridad que guarda absolutamente todos los archivos y datos seleccionados, sin importar si han cambiado o no desde la última vez.\n\n¿Para qué sirve?\nSirve para tener un punto de partida seguro desde el que restaurar todo el sistema. Es el método más lento de copiar y el que más espacio ocupa.\n\nSe relaciona con:\nBackup completo → base para copias incrementales o diferenciales",
+    "example": "Ejemplo:\nCada domingo de madrugada, el servidor de la empresa hace un backup completo copiando los 500 GB de datos de los trabajadores.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Backup diferencial",
+    "full": "Copia de seguridad diferencial",
+    "definition": "¿Qué es?\nEs una copia de seguridad que guarda únicamente los archivos que han cambiado desde el último backup COMPLETO.\n\n¿Para qué sirve?\nSirve para ahorrar espacio y tiempo comparado con hacer una copia completa todos los días. Para restaurar los datos solo necesitas dos archivos: el backup completo y el último diferencial.\n\nDiferencia con incremental:\nEl diferencial siempre mira hacia el último backup completo; el incremental mira hacia el último backup de cualquier tipo.",
+    "example": "Ejemplo:\nDomingo → Backup completo.\nLunes → Copia lo cambiado desde el domingo.\nMartes → Copia todo lo cambiado desde el domingo.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Backup incremental",
+    "full": "Copia de seguridad incremental",
+    "definition": "¿Qué es?\nEs una copia que guarda solo los datos que han cambiado desde el último backup realizado (sea completo o incremental).\n\n¿Para qué sirve?\nEs la forma más rápida de hacer copias de seguridad diarias ocupando poquísimo espacio. Sin embargo, para restaurar el sistema necesitas la copia completa y todas las incrementales en orden.\n\nSe relaciona con:\nTiempo de copia → muy rápido.\nTiempo de recuperación → más lento (hay que encadenar varias copias).",
+    "example": "Ejemplo:\nDomingo → Completo.\nLunes → Cambios del lunes.\nMartes → Cambios del martes.\nMiércoles → Cambios del miércoles.\nSi se rompe el disco el jueves, necesitas cargar el del domingo + lunes + martes + miércoles.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Cobian Backup",
+    "full": "",
+    "definition": "¿Qué es?\nEs un programa informático gratuito muy utilizado para configurar y automatizar copias de seguridad en sistemas Windows.\n\n¿Para qué sirve?\nPermite programar cuándo se hacen las copias, de qué tipo (completa, incremental) y dónde se guardan, pudiendo además comprimir y cifrar los archivos resultantes.",
+    "example": "Ejemplo:\nConfiguras Cobian Backup en el ordenador de recepción para que todos los días a las 20:00 haga un backup incremental cifrado de la carpeta de clientes y lo envíe a un disco duro externo.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "AES-256",
+    "full": "Advanced Encryption Standard 256-bit",
+    "definition": "¿Qué es?\nEs un algoritmo de cifrado de nivel militar. Utiliza una clave de 256 bits para mezclar y ocultar la información de un archivo.\n\n¿Para qué sirve?\nSirve para proteger la confidencialidad de los datos. Sin la contraseña o clave correcta, la información es ilegible.\n\nDiferencia clave:\nCifrado (AES-256) → Oculta el contenido para que nadie lo lea.\nHash (SHA-256) → Crea una huella para comprobar si el archivo cambió, pero no oculta su contenido.",
+    "example": "Ejemplo:\nArchivo de contraseñas → cifrado con AES-256 + clave secreta → archivo ilegible.\nIncluso si un hacker roba el archivo, tardaría miles de años en descifrarlo sin la clave.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "BitLocker",
+    "full": "",
+    "definition": "¿Qué es?\nEs la herramienta oficial incluida en Windows para cifrar unidades de disco completas o pendrives.\n\n¿Para qué sirve?\nSirve para evitar que alguien pueda leer los datos de tu ordenador si extrae físicamente el disco duro o si te roban el portátil.\n\nSe relaciona con:\nTPM → BitLocker guarda su clave de descifrado en el chip TPM de la placa base.",
+    "example": "Ejemplo:\nTe roban el portátil apagado. El ladrón saca el disco duro y lo conecta por USB a su ordenador para leer tus fotos. Como usaste BitLocker, Windows le pedirá una larguísima clave de recuperación; al no tenerla, el disco parece vacío/bloqueado.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "HASH / SHA-256",
+    "full": "Secure Hash Algorithm 256-bit",
+    "definition": "¿Qué es?\nUn hash es una operación matemática que coge un archivo (da igual su tamaño) y genera una \"huella digital\" única de texto y números. SHA-256 es uno de los algoritmos más seguros para hacerlo.\n\n¿Para qué sirve?\nSirve para comprobar la integridad de un archivo; es decir, para asegurarnos de que no ha sido modificado, dañado o infectado por un virus.\n\nRegla:\nSi el archivo original cambia un solo punto o coma, el código hash resultante cambia por completo.",
+    "example": "Ejemplo:\nDescargas un instalador de Ubuntu. En la web oficial dice que su SHA-256 es \"A1B2C3...\". Pasas el archivo por un programa de hash en tu PC y te da \"A1B2C3...\". Como coinciden, sabes que la descarga es perfecta y nadie ha manipulado el archivo en medio del camino.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Wiping",
+    "full": "Borrado seguro / Sobrescritura",
+    "definition": "¿Qué es?\nEs el proceso de eliminar información de un disco duro de forma definitiva sobrescribiendo el espacio que ocupaban los archivos con datos aleatorios, ceros y unos.\n\n¿Para qué sirve?\nSirve para impedir que se puedan utilizar programas de recuperación de datos forenses cuando vas a vender, reciclar o tirar un disco duro.\n\nDiferencia:\nBorrado normal → Solo borra el índice, el archivo sigue en el disco.\nWiping → Destruye el archivo físico reescribiendo encima.",
+    "example": "Ejemplo:\nAntes de vender un ordenador de empresa, pasas un programa de wiping que escribe ceros en todos los sectores del disco. Así te aseguras de que el comprador no pueda rescatar documentos antiguos.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Degaussing",
+    "full": "Desmagnetización",
+    "definition": "¿Qué es?\nEs un método de destrucción de datos que utiliza un campo magnético extremadamente potente para borrar los discos.\n\n¿Para qué sirve?\nSirve para destruir instantáneamente toda la información guardada en soportes magnéticos (como discos duros HDD antiguos o cintas de backup), dejándolos completamente inservibles para siempre.\n\nSe relaciona con:\nWiping → borrado por software.\nDegaussing → destrucción magnética por hardware.",
+    "example": "Ejemplo:\nUn hospital tiene 50 discos duros averiados con historiales médicos. En lugar de tirarlos a la basura, los pasan por un \"degausser\" (un aparato que aplica un choque magnético) para que los datos sean irrecuperables.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Cold Boot Attack",
+    "full": "Ataque de arranque en frío",
+    "definition": "¿Qué es?\nEs un ataque físico que se aprovecha de que la memoria RAM tarda unos segundos o minutos en perder totalmente sus datos después de apagar el ordenador, especialmente si se enfría bruscamente.\n\n¿Para qué sirve?\nLos atacantes (o investigadores forenses) lo utilizan para intentar rescatar claves de cifrado (como la de BitLocker) que estaban en la RAM justo antes de apagar o reiniciar la máquina.\n\nProcedimiento:\nPC encendido → se congela la RAM → se apaga el PC de golpe → se extrae la RAM → se conecta a otro equipo para leer los datos que aún no se han borrado.",
+    "example": "Ejemplo:\nUn forense policial aplica un spray congelante sobre la RAM de un ordenador bloqueado, apaga de un tirón el cable de corriente, saca la RAM y la lee en otro aparato para extraer contraseñas antes de que la memoria se vacíe.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Estándares de borrado seguro",
+    "full": "",
+    "definition": "¿Qué es?\nSon normativas oficiales que indican exactamente cuántas veces y con qué patrones hay que sobrescribir un disco para que la información se considere legal y técnicamente destruida.\n\n¿Para qué sirve?\nGarantiza que una empresa cumple con la ley al desechar equipos.\n\nEjemplos del temario:\n- DoD 5220.22-M: Estándar militar clásico de EE.UU. (3 pasadas).\n- Gutmann: Método antiguo y paranoico (35 pasadas).\n- NIST 800-88: Estándar moderno, recomienda métodos criptográficos o comandos internos (Secure Erase) para los discos SSD actuales.",
+    "example": "Ejemplo:\nEl departamento técnico aplica el estándar NIST 800-88 a los discos SSD antes de reciclarlos, porque saben que hacer 35 pasadas (Gutmann) a un SSD moderno solo acortaría su vida útil sin mejorar el borrado.",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Sistema Binario",
+    "full": "Base 2",
+    "definition": "¿Qué es?\nEs un sistema numérico que utiliza únicamente dos símbolos: el 0 y el 1 (apagado y encendido). Es el lenguaje de más bajo nivel que entienden los ordenadores.\n\n¿Para qué sirve?\nSirve para representar toda la información, cálculos y datos que un ordenador procesa y transmite.\n\nSe relaciona con:\nBinario (0,1) → Decimal (0-9) → Hexadecimal (0-9, A-F)",
+    "example": "Ejemplo:\nLa letra \"A\" en el ordenador no se guarda como una letra física, sino que se traduce a un código binario como 01000001.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Sistema Decimal",
+    "full": "Base 10",
+    "definition": "¿Qué es?\nEs el sistema numérico que utilizamos los humanos en nuestro día a día. Utiliza diez símbolos: del 0 al 9.\n\n¿Para qué sirve?\nEn redes, se usa para mostrar de forma amigable direcciones que internamente son binarias.\n\nEjemplo:\nLas direcciones IP que configuramos (como 192.168.1.1) se escriben en sistema decimal para que podamos leerlas fácilmente, aunque el router las procesa en binario.",
+    "example": "Ejemplo:\nEs mucho más fácil recordar la IP 192.168.1.1 (decimal) que su equivalente binario 11000000.10101000.00000001.00000001.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Sistema Hexadecimal",
+    "full": "Base 16",
+    "definition": "¿Qué es?\nEs un sistema numérico que utiliza 16 símbolos: los números del 0 al 9, y las letras de la A a la F (donde A=10, B=11, C=12, D=13, E=14, F=15).\n\n¿Para qué sirve?\nSirve para agrupar y compactar grandes cadenas de ceros y unos binarios, haciéndolas más cortas y fáciles de leer para los informáticos.\n\nProcedimiento:\nCada letra/número hexadecimal equivale exactamente a 4 bits (ceros o unos).\n1010₂ = A₁₆",
+    "example": "Ejemplo:\nLas direcciones MAC de las tarjetas de red se escriben siempre en hexadecimal (ej: 00:1A:2B:3C:4D:5E) porque si se escribieran en binario serían larguísimas (48 bits).",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Sistema Octal",
+    "full": "Base 8",
+    "definition": "¿Qué es?\nEs un sistema numérico que utiliza ocho símbolos: del 0 al 7.\n\n¿Para qué sirve?\nEn informática se suele utilizar para representar de forma compacta permisos de archivos, especialmente en sistemas operativos Linux o Unix.",
+    "example": "Ejemplo:\nEn Linux, el comando \"chmod 777\" utiliza el sistema octal para dar permisos totales (lectura, escritura y ejecución) a un archivo.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Ponderación posicional",
+    "full": "",
+    "definition": "¿Qué es?\nEs el método matemático que da un valor distinto a cada número dependiendo de la posición que ocupe, elevando la base a una potencia.\n\n¿Para qué sirve?\nSirve para convertir números de binario a decimal (o a otras bases) sumando el valor que le corresponde a cada \"1\" según su posición.\n\nProcedimiento (de binario a decimal):\n1010\n(1 × 2³) + (0 × 2²) + (1 × 2¹) + (0 × 2⁰)\n8 + 0 + 2 + 0 = 10",
+    "example": "Ejemplo:\nEn el número decimal 350, el 3 vale trescientos, no tres, gracias a su posición. En binario ocurre exactamente lo mismo, pero usando potencias del número 2 (1, 2, 4, 8, 16...).",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Modelo OSI",
+    "full": "Open Systems Interconnection",
+    "definition": "¿Qué es?\nEs un modelo teórico de 7 capas que explica cómo viaja la información desde el programa de un ordenador hasta el cable de red, y viceversa.\n\n¿Para qué sirve?\nSirve como mapa estándar para que los fabricantes de software y hardware puedan crear productos que se entiendan entre sí, y para ayudar a diagnosticar problemas de red.\n\nLas 7 capas:\n7. Aplicación\n6. Presentación\n5. Sesión\n4. Transporte\n3. Red\n2. Enlace de datos\n1. Física",
+    "example": "Ejemplo:\nSi una página web no carga, el modelo OSI te ayuda a buscar el problema por capas: ¿Está roto el cable (Capa 1)? ¿El router está mal configurado (Capa 3)? ¿Falla el navegador web (Capa 7)?",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Modelo TCP/IP",
+    "full": "",
+    "definition": "¿Qué es?\nEs un modelo práctico y simplificado (normalmente de 4 o 5 capas) que describe exactamente cómo funciona Internet en el mundo real, agrupando algunas capas del modelo OSI.\n\n¿Para qué sirve?\nDefine las reglas básicas de cómo los ordenadores deben empaquetar, enrutar y recibir los datos a través de redes globales.\n\nCapas principales:\nAplicación → Transporte → Internet (Red) → Acceso a la red.",
+    "example": "Ejemplo:\nMientras el Modelo OSI es como los planos teóricos de un coche, el Modelo TCP/IP es el motor real que hace funcionar las comunicaciones de Internet en tu ordenador cada día.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Dirección IP",
+    "full": "Internet Protocol Address",
+    "definition": "¿Qué es?\nEs un identificador numérico lógico asignado a cualquier dispositivo que se conecte a una red. Es como el número de teléfono o la matrícula del ordenador.\n\n¿Para qué sirve?\nSirve para que la red sepa a dónde tiene que enviar los paquetes de datos y de dónde provienen.\n\nSe relaciona con:\nMAC → Dirección física fija.\nIP → Dirección lógica que puede cambiar si cambias de red.",
+    "example": "Ejemplo:\nCuando tu ordenador se conecta al Wi-Fi de tu casa, el router le da la dirección IP 192.168.1.33. Si vas a una cafetería, ese router te dará una IP diferente para navegar.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Máscara de subred",
+    "full": "",
+    "definition": "¿Qué es?\nEs un número que acompaña siempre a una dirección IP y actúa como una \"plantilla\" separadora.\n\n¿Para qué sirve?\nSirve para indicarle al ordenador qué parte de su dirección IP corresponde a la red general (el barrio) y qué parte identifica al dispositivo concreto (la casa).\n\nProcedimiento:\nSi tenemos la IP 192.168.1.25 y la máscara 255.255.255.0:\n192.168.1 → Parte de RED.\n.25 → Parte del DISPOSITIVO.",
+    "example": "Ejemplo:\nGracias a la máscara de subred, tu ordenador sabe que si quiere hablar con el equipo 192.168.1.50 está en su misma red local, pero si quiere ir a 8.8.8.8 tiene que salir a Internet.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Gateway",
+    "full": "Puerta de enlace predeterminada",
+    "definition": "¿Qué es?\nEs la dirección IP del dispositivo (normalmente el router) que sirve como puerta de salida hacia otras redes o hacia Internet.\n\n¿Para qué sirve?\nCuando tu ordenador quiere enviar un paquete a una dirección IP que no está en su red local, se lo envía automáticamente al Gateway para que él se encargue de enrutarlo hacia su destino.\n\nSe relaciona con:\nPC → Gateway (Router) → Internet",
+    "example": "Ejemplo:\nSi tu PC es 192.168.1.10 y quieres abrir Google, tu PC envía la petición a 192.168.1.1 (tu router o Gateway), y el router se encarga de buscar a Google en Internet.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Dirección MAC",
+    "full": "Media Access Control",
+    "definition": "¿Qué es?\nEs el identificador físico único grabado de fábrica en la tarjeta de red de cada dispositivo (compuesto por 48 bits, escritos en hexadecimal).\n\n¿Para qué sirve?\nSirve para identificar el dispositivo físicamente dentro de una red local. Los switches utilizan la MAC para enviar los datos exactamente al cable correcto.\n\nSe relaciona con:\nIP → Para comunicarse entre diferentes redes (Internet).\nMAC → Para comunicarse dentro de la misma red local (Switch).",
+    "example": "Ejemplo:\n00:1A:2B:3C:4D:5E es una dirección MAC. Nunca cambia, aunque te lleves el portátil de tu casa a la universidad.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "OUI",
+    "full": "Organizationally Unique Identifier",
+    "definition": "¿Qué es?\nSon los primeros 24 bits (los tres primeros pares de números/letras) de una dirección MAC.\n\n¿Para qué sirve?\nSirve para identificar qué empresa o fabricante ha construido esa tarjeta de red.\n\nEjemplo:\nEn la MAC 00:1A:2B:3C:4D:5E:\n00:1A:2B → OUI (identifica al fabricante, ej. Cisco, Intel o Apple).\n3C:4D:5E → Número de serie único de la tarjeta.",
+    "example": "Ejemplo:\nSi capturas tráfico de red en Wireshark y ves que la MAC empieza por un OUI específico de Apple, sabes que ese dispositivo es un iPhone, iPad o Mac.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "TCP",
+    "full": "Transmission Control Protocol",
+    "definition": "¿Qué es?\nEs el protocolo de transporte más utilizado en Internet. Está orientado a conexión, lo que significa que establece un canal seguro antes de enviar datos.\n\n¿Para qué sirve?\nSirve para garantizar que los datos se entreguen de forma fiable, ordenando los paquetes que llegan desordenados y pidiendo que se reenvíen los que se pierden por el camino.\n\nSe relaciona con:\nTCP → lentitud inicial pero 100% de fiabilidad.",
+    "example": "Ejemplo:\nCuando descargas un archivo PDF o visitas una web bancaria, se usa TCP. Si se perdiera un solo paquete de datos, el archivo quedaría corrupto, así que TCP asegura que llegue entero.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Banderas TCP (TCP Flags)",
+    "full": "Indicadores de control TCP",
+    "definition": "¿Qué es?\nSon unas \"etiquetas\" invisibles dentro de un paquete TCP que indican el propósito de ese paquete o el estado de la conexión.\n\n¿Para qué sirven?\nSirven para que los ordenadores se comuniquen y gestionen la conexión:\n- SYN: Inicia o sincroniza una conexión.\n- ACK: Confirma que ha recibido un paquete.\n- FIN: Pide cerrar la conexión de forma amable.\n- RST: Corta o rechaza la conexión de golpe.\n- PSH: Pide entregar los datos rápidos a la aplicación.\n- URG: Marca datos como urgentes.",
+    "example": "Ejemplo:\nSi tu ordenador manda un paquete con la bandera SYN, le está diciendo al servidor: \"Hola, quiero abrir una conexión nueva contigo\".",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Three-Way Handshake",
+    "full": "Saludo de tres vías TCP",
+    "definition": "¿Qué es?\nEs el proceso obligatorio de tres pasos que utiliza TCP para establecer una conexión antes de enviar el primer dato útil.\n\n¿Para qué sirve?\nSirve para que tanto el cliente como el servidor se pongan de acuerdo, sincronicen sus números y confirmen que ambos están listos para hablar.\n\nProcedimiento:\n1. Cliente → SYN (Quiero conectarme)\n2. Servidor → SYN + ACK (Vale, acepto. Yo también me conecto)\n3. Cliente → ACK (Perfecto, recibido)\n\nResultado:\nLa conexión queda establecida y empieza la transferencia de datos.",
+    "example": "Ejemplo:\nEs como llamar por teléfono:\n1. Tú: \"¿Diga?\" (SYN)\n2. Él: \"Hola, soy Juan, te escucho\" (SYN+ACK)\n3. Tú: \"Vale Juan, te cuento...\" (ACK y empiezan los datos).",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "UDP",
+    "full": "User Datagram Protocol",
+    "definition": "¿Qué es?\nEs un protocolo de transporte muy sencillo y sin conexión. Envía los paquetes de datos directamente sin avisar ni hacer ningún \"saludo\" previo.\n\n¿Para qué sirve?\nSirve para enviar datos a la máxima velocidad posible. No comprueba si los paquetes llegan, ni en qué orden lo hacen, por lo que no pierde tiempo en verificaciones.\n\nSe relaciona con:\nUDP → velocidad máxima, pero sin garantías.",
+    "example": "Ejemplo:\nSe utiliza en videojuegos online, videollamadas o streaming en directo. Si pierdes un paquete en una videollamada, la imagen se pixela un segundo, pero la llamada sigue sin detenerse a recuperar esa imagen.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "TCP vs UDP",
+    "full": "Diferencias principales",
+    "definition": "¿Qué es?\nEs la comparación entre los dos protocolos de transporte principales de Internet.\n\nDiferencias claras:\nTCP:\n- Orientado a conexión (Three-Way Handshake).\n- Confirma la entrega (ACK).\n- Ordena los paquetes.\n- Más seguro y fiable, pero más lento.\n\nUDP:\n- No orientado a conexión.\n- No confirma nada, dispara los datos.\n- Menor sobrecarga de red.\n- Más rápido, ideal cuando importa más la inmediatez que la perfección.",
+    "example": "Ejemplo:\nTCP es como enviar una carta certificada con acuse de recibo. UDP es como gritar un mensaje desde la ventana a alguien que va en bicicleta.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "DHCP",
+    "full": "Dynamic Host Configuration Protocol",
+    "definition": "¿Qué es?\nEs el protocolo que permite configurar automáticamente los dispositivos de una red.\n\n¿Para qué sirve?\nEvita que tengamos que escribir a mano la dirección IP, la máscara de subred, la puerta de enlace (Gateway) y el DNS en cada ordenador o móvil nuevo que se conecta a la red.\n\nSe relaciona con:\nDHCP → IP dinámica temporal (concesión).",
+    "example": "Ejemplo:\nCuando un amigo viene a casa y pone la contraseña de tu Wi-Fi, su móvil habla por debajo con tu router usando DHCP y recibe al instante una IP válida para poder navegar.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "DHCP DORA",
+    "full": "Discover, Offer, Request, ACK",
+    "definition": "¿Qué es?\nEs la secuencia de cuatro mensajes que intercambian un dispositivo y un servidor DHCP para configurar la red.\n\n¿Para qué sirve?\nGarantiza que el dispositivo obtenga una IP válida y que el servidor registre que esa IP ya está ocupada.\n\nProcedimiento:\n1. DISCOVER: Cliente grita \"¿Hay algún servidor DHCP libre?\"\n2. OFFER: Servidor responde \"Sí, te ofrezco la IP 192.168.1.50\"\n3. REQUEST: Cliente contesta \"Me parece bien, solicito quedarme esa IP\"\n4. ACK: Servidor confirma \"De acuerdo, IP asignada, aquí tienes el resto de datos\".",
+    "example": "Ejemplo:\nEs una subasta rápida e invisible que ocurre en un par de milisegundos cada vez que enciendes el PC o activas el Wi-Fi del móvil.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "DHCP Release y NAK",
+    "full": "",
+    "definition": "¿Qué es?\nSon dos mensajes complementarios del protocolo DHCP.\n\n¿Para qué sirven?\n- RELEASE: Lo envía el cliente para decirle al servidor: \"Ya no necesito esta IP, la libero para que se la des a otro\".\n- NAK (Negative Acknowledgement): Lo envía el servidor para decirle al cliente: \"No acepto tu solicitud\" (por ejemplo, si el cliente pide una IP que ya se le dio a otro equipo).\n\nSe relaciona con:\nRenovación de IP → ciclo de vida de DHCP.",
+    "example": "Ejemplo:\nApagas el ordenador correctamente en la oficina. Antes de apagarse, manda un mensaje de Release al servidor DHCP para que la IP 192.168.1.10 quede libre para el turno de tarde.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "DNS",
+    "full": "Domain Name System",
+    "definition": "¿Qué es?\nEs el sistema de resolución de nombres de Internet, a menudo descrito como la \"agenda telefónica\" de la red.\n\n¿Para qué sirve?\nSirve para traducir los nombres de dominio legibles por humanos (como google.com) a las direcciones IP numéricas que los ordenadores necesitan para conectarse.\n\nProcedimiento:\nEscribes marca.com → Tu PC consulta al servidor DNS → El DNS responde \"Esa web está en la IP 104.18.23.10\" → Tu PC se conecta a esa IP.",
+    "example": "Ejemplo:\nSin DNS, tendrías que memorizar números como 142.250.200.14 para entrar en YouTube.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Registros y Puerto DNS",
+    "full": "",
+    "definition": "¿Qué es?\nLos registros DNS son las diferentes entradas o reglas dentro del servidor (ej. registro A para IPv4, registro MX para el correo). El servicio DNS trabaja habitualmente escuchando en el puerto 53.\n\n¿Para qué sirve?\nPermiten al servidor organizar qué IP corresponde a la web, qué servidor maneja los emails de esa empresa, etc.\n\nSe relaciona con:\nPuerto UDP 53 → consultas rápidas normales de DNS.\nPuerto TCP 53 → transferencias de zona grandes entre servidores.",
+    "example": "Ejemplo:\nCuando mandas un email a info@empresa.com, tu servidor pide el \"Registro MX\" de empresa.com al DNS por el puerto 53 para saber a qué máquina exacta debe enviar el correo.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puertos de Red",
+    "full": "",
+    "definition": "¿Qué es?\nUn puerto es un número (del 0 al 65535) asociado a una dirección IP. Funciona como una \"puerta virtual\" dentro del ordenador.\n\n¿Para qué sirve?\nSirve para que el ordenador sepa a qué programa o servicio debe entregar los datos que le llegan. \n\nClasificación (IANA):\n0 a 1023 → Puertos bien conocidos (sistemas y servicios fijos).\n1024 a 49151 → Puertos registrados (aplicaciones comerciales).\n49152 a 65535 → Puertos dinámicos/privados (usados por el cliente para la vuelta de datos).",
+    "example": "Ejemplo:\nTu IP recibe dos paquetes: uno para el puerto 80 y otro para el 25. El sistema sabe que el paquete del 80 va al servidor Web y el del 25 al servidor de correos.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 21 (FTP)",
+    "full": "File Transfer Protocol",
+    "definition": "¿Qué es?\nEs el puerto predeterminado para el protocolo de transferencia de archivos (FTP).\n\n¿Para qué sirve?\nSe utilizaba masivamente para subir y descargar archivos hacia o desde un servidor. Hoy en día se considera inseguro porque envía las contraseñas en texto plano (sin cifrar).",
+    "example": "Ejemplo:\nUn diseñador sube las imágenes de una nueva página web al servidor de la empresa usando el puerto 21.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 22 (SSH)",
+    "full": "Secure Shell",
+    "definition": "¿Qué es?\nEs el puerto del protocolo SSH.\n\n¿Para qué sirve?\nSirve para conectarse de forma remota a la consola de comandos de un servidor o dispositivo de forma totalmente cifrada y segura.\n\nSe relaciona con:\nSSH → Administración remota de Linux o routers.",
+    "example": "Ejemplo:\nUn informático en Madrid abre una terminal, usa SSH y se conecta de forma segura al puerto 22 de un servidor en Alemania para instalar unas actualizaciones.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 23 (Telnet)",
+    "full": "",
+    "definition": "¿Qué es?\nEs el protocolo antiguo de administración remota.\n\n¿Para qué sirve?\nServía para conectarse por comandos a otra máquina, pero transmite absolutamente todo (incluidas las contraseñas de administrador) en texto plano, por lo que cualquiera en la red puede leerlas.\n\nDiferencia:\nTelnet (23) → Inseguro.\nSSH (22) → Seguro y cifrado.",
+    "example": "Ejemplo:\nEn ciberseguridad, encontrar el puerto 23 abierto en un equipo moderno se considera una vulnerabilidad crítica de mala configuración.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 25 (SMTP)",
+    "full": "Simple Mail Transfer Protocol",
+    "definition": "¿Qué es?\nEs el puerto estándar original para el envío de correo electrónico.\n\n¿Para qué sirve?\nSirve para que tu ordenador envíe un email al servidor de correos, o para que dos servidores de correo se envíen mensajes entre sí.",
+    "example": "Ejemplo:\nCuando le das a \"Enviar\" en tu programa de correo, este contacta con el puerto 25 de tu servidor de salida para entregarle el mensaje.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 80 (HTTP)",
+    "full": "Hypertext Transfer Protocol",
+    "definition": "¿Qué es?\nEs el puerto predeterminado para el tráfico web sin cifrar.\n\n¿Para qué sirve?\nPermite cargar páginas web básicas. La información viaja en texto claro, por lo que alguien en tu misma red Wi-Fi podría ver qué estás leyendo o interceptar lo que escribes.",
+    "example": "Ejemplo:\nSi entras en una página que no tiene el \"candadito\" en el navegador (http://), te estás comunicando por el puerto 80.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 443 (HTTPS)",
+    "full": "Hypertext Transfer Protocol Secure",
+    "definition": "¿Qué es?\nEs el puerto estándar para la navegación web segura y cifrada.\n\n¿Para qué sirve?\nUtiliza certificados TLS/SSL para cifrar toda la información que viaja entre tu navegador y la página web, garantizando confidencialidad e integridad.\n\nSe relaciona con:\nPuerto 80 (HTTP) → inseguro.\nPuerto 443 (HTTPS) → cifrado.",
+    "example": "Ejemplo:\nCuando compras en Amazon o entras al banco, aparece el candadito en el navegador porque estás usando HTTPS a través del puerto 443, protegiendo los datos de tu tarjeta de crédito.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 445 (SMB)",
+    "full": "Server Message Block",
+    "definition": "¿Qué es?\nEs el protocolo nativo de Windows para compartir recursos en la red local.\n\n¿Para qué sirve?\nSirve para compartir carpetas, archivos y acceder a impresoras de red entre ordenadores Windows.\n\nAdvertencia de seguridad:\nExponer el puerto 445 directamente a Internet es un riesgo gigante, porque muchos ataques (como el ransomware WannaCry) explotan vulnerabilidades de SMB.",
+    "example": "Ejemplo:\nEn una oficina, abres la \"Carpeta Compartida\" que está en el servidor para coger un documento Excel. Esa conexión interna usa el puerto 445.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Puerto 3389 (RDP)",
+    "full": "Remote Desktop Protocol",
+    "definition": "¿Qué es?\nEs el protocolo oficial de Escritorio Remoto de Microsoft Windows.\n\n¿Para qué sirve?\nPermite ver la pantalla completa y controlar el teclado y ratón de otro ordenador Windows a distancia, como si estuvieras sentado delante de él.\n\nSe relaciona con:\nSSH (22) → Consola de comandos remota.\nRDP (3389) → Pantalla gráfica remota.",
+    "example": "Ejemplo:\nUn oficinista trabaja desde casa conectándose mediante RDP (puerto 3389) al ordenador de su mesa en la empresa, viendo su fondo de pantalla y sus programas exactos.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  }
+);
+SEED_DATA.push(
+  {
+    "term": "Firewall",
+    "full": "Cortafuegos",
+    "definition": "¿Qué es?\nUn firewall es un sistema de seguridad (puede ser un aparato físico o un programa) que vigila y controla todo el tráfico de datos que intenta entrar o salir de una red.\n\n¿Para qué sirve?\nSirve para bloquear conexiones peligrosas (como un atacante intentando entrar) y permitir solo las conexiones seguras, siguiendo unas reglas previamente configuradas.\n\nDiferencias:\nFirewall de red → Protege a toda la empresa o casa. Se coloca en la frontera con Internet.\nFirewall de host → Protege únicamente al ordenador donde está instalado (ej. Windows Defender Firewall).",
+    "example": "Ejemplo:\nEl firewall del instituto tiene una regla que dice: \"Permitir que los alumnos entren a Wikipedia (puerto 443), pero bloquear cualquier intento de conexión a servidores de videojuegos online\".",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "VLAN",
+    "full": "Virtual Local Area Network",
+    "definition": "¿Qué es?\nEs una técnica que permite dividir una única red física (con los mismos cables y switches) en varias redes lógicas independientes y separadas por software.\n\n¿Para qué sirve?\nSirve para organizar los equipos por departamentos y mejorar la seguridad. Aunque dos ordenadores estén enchufados al mismo aparato, si están en VLANs distintas, no pueden verse ni comunicarse directamente.\n\nSe relaciona con:\nRed → Switch → VLANs separadas.",
+    "example": "Ejemplo:\nEn un hospital usan los mismos cables para todo, pero configuran la VLAN 10 para los ordenadores de los médicos y la VLAN 20 para las televisiones de los pacientes. Así, si un paciente conecta un pendrive con virus a la tele, el virus no puede saltar a los ordenadores médicos.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Red de invitados",
+    "full": "",
+    "definition": "¿Qué es?\nEs una red Wi-Fi separada y aislada que se ofrece a los visitantes de una empresa o una casa.\n\n¿Para qué sirve?\nPermite dar acceso a Internet a las visitas sin que puedan entrar a los servidores internos, ver las carpetas compartidas o infectar los ordenadores principales de la organización.\n\nSe relaciona con:\nInvitado → Internet (Sí).\nInvitado → Servidor interno de la empresa (No).",
+    "example": "Ejemplo:\nLlegas a las oficinas de un cliente y pides la clave del Wi-Fi. Te dan la de la red \"Empresa-Invitados\". Puedes revisar tu WhatsApp, pero no puedes acceder a la impresora de su oficina.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "DMZ",
+    "full": "Demilitarized Zone (Zona Desmilitarizada)",
+    "definition": "¿Qué es?\nEs una zona intermedia y aislada de la red, situada entre el Internet público (muy peligroso) y la red interna de la empresa (muy segura).\n\n¿Para qué sirve?\nSirve para colocar allí los servidores que el público necesita visitar (como la página web de la empresa). Si un hacker ataca esa web, se quedará atrapado en la DMZ y no podrá pasar a los ordenadores de los trabajadores.\n\nSe relaciona con:\nInternet → Firewall 1 → DMZ (Servidor Web) → Firewall 2 → Red interna (Datos privados).",
+    "example": "Ejemplo:\nUn banco tiene su página web en la DMZ para que los clientes entren, pero la base de datos con el dinero de las cuentas está escondida detrás, en la red interna.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "VPN",
+    "full": "Virtual Private Network",
+    "definition": "¿Qué es?\nEs una tecnología que crea un \"túnel\" cerrado y cifrado a través de Internet para conectar tu dispositivo con otra red.\n\n¿Para qué sirve?\nSirve para proteger tu tráfico en redes Wi-Fi públicas y para poder conectarte de forma segura a los servidores de tu empresa desde el sofá de tu casa.\n\nProcedimiento:\nUsuario → VPN cifra los datos → Internet público → Servidor VPN los descifra → Red destino.",
+    "example": "Ejemplo:\nEstás en la cafetería usando su Wi-Fi abierto. Enciendes tu VPN. Ahora, todo lo que haces viaja cifrado por un túnel; si un atacante en la cafetería intenta espiarte, solo verá basura incomprensible.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Máquina Virtual (VM)",
+    "full": "",
+    "definition": "¿Qué es?\nEs un ordenador creado por software que funciona como un programa más dentro de tu ordenador físico real. Tiene su propio sistema operativo (como un Windows dentro de otro Windows).\n\n¿Para qué sirve?\nSirve para practicar, instalar sistemas diferentes (como Linux) o probar archivos sospechosos en un entorno cerrado y seguro.\n\nSe relaciona con:\nOrdenador (Anfitrión/Host) → Software de virtualización → Máquina Virtual (Invitado/Guest).",
+    "example": "Ejemplo:\nQuieres probar un programa que crees que podría ser un virus. En lugar de instalarlo en tu PC principal, abres una Máquina Virtual, lo pruebas allí y, si rompe el sistema, simplemente borras la máquina virtual sin que tu PC real sufra ningún daño.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Cadena: VM → VPN → Tor",
+    "full": "Cadena de aislamiento y privacidad",
+    "definition": "¿Qué es?\nEs una estructura teórica que combina varias herramientas para lograr un altísimo nivel de aislamiento y anonimato en Internet.\n\n¿Cómo funciona paso a paso?\n1. VM: Te aísla de tu ordenador físico.\n2. VPN: Oculta tu dirección IP real a tu compañía de Internet (movistar, vodafone, etc).\n3. Tor (The Onion Router): Pasa tu tráfico por varios ordenadores repartidos por el mundo (nodos de entrada, medio y salida) aplicando capas de cifrado.\n\nResultado:\nEs muy difícil rastrear el origen de la conexión, aunque nunca existe un anonimato absoluto.",
+    "example": "Ejemplo:\nUn investigador de ciberseguridad que tiene que infiltrarse en foros de cibercriminales utiliza esta cadena. Así, si los criminales intentan rastrearle, solo verán la IP del nodo de salida de Tor en otro país, protegiendo su identidad real.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Identificación vs Autenticación",
+    "full": "",
+    "definition": "¿Qué es?\nSon dos pasos inseparables pero diferentes al entrar a un sistema.\n\n1. Identificación: Es decirle al sistema quién eres tú.\n2. Autenticación: Es demostrarle al sistema que realmente eres esa persona.\n\nDiferencia clara:\nIdentidad = \"Soy Juan\".\nAutenticación = \"Demuestro que soy Juan porque me sé la contraseña secreta de Juan\".",
+    "example": "Ejemplo:\nCuando entras a Instagram, poner tu nombre de usuario (@juan_perez) es la identificación. Poner tu contraseña correcta es la autenticación.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "MFA",
+    "full": "Multi-Factor Authentication",
+    "definition": "¿Qué es?\nEs la autenticación multifactor. Un sistema que te obliga a presentar dos o más pruebas diferentes (factores) para demostrar tu identidad y dejarte entrar.\n\n¿Para qué sirve?\nSirve para que, si un hacker te roba la contraseña, siga sin poder entrar a tu cuenta porque le faltará el segundo paso.\n\nLos 3 factores principales:\n1. Algo que SABES (Contraseña o PIN).\n2. Algo que TIENES (Tu móvil, una tarjeta, una llave USB).\n3. Algo que ERES (Huella dactilar, cara).",
+    "example": "Ejemplo:\nPara entrar en el banco usas tu DNI y contraseña (algo que sabes). Luego, el banco te manda un código SMS a tu móvil (algo que tienes). Solo si pones los dos, entras.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "IAM",
+    "full": "Identity and Access Management",
+    "definition": "¿Qué es?\nEs el sistema y conjunto de políticas que utiliza una empresa para gestionar todas las identidades y los permisos de sus empleados.\n\n¿Para qué sirve?\nAyuda a responder de forma automática a tres preguntas:\n¿Quién eres? → ¿Qué puesto tienes? → ¿A qué carpetas o programas te dejo acceder?\n\nSe relaciona con:\nIAM engloba los conceptos de identificación, autenticación y autorización.",
+    "example": "Ejemplo:\nCuando entra una trabajadora nueva al departamento de diseño, el sistema IAM le crea su usuario automáticamente y le da acceso a las carpetas de fotos, pero le bloquea el acceso a las carpetas de contabilidad.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "RBAC",
+    "full": "Role-Based Access Control",
+    "definition": "¿Qué es?\nEs un método para controlar el acceso a los sistemas basándose en el rol (el puesto de trabajo) de la persona, en lugar de darle permisos uno por uno.\n\n¿Para qué sirve?\nSirve para no volverse loco configurando miles de ordenadores. Si alguien cambia de puesto, simplemente se le cambia el \"rol\" y el sistema le da los permisos nuevos automáticamente.",
+    "example": "Ejemplo:\nRol: Profesor → Permiso: Poner y cambiar notas.\nRol: Alumno → Permiso: Solo leer notas.\nSi apruebas una oposición y pasas de ser alumno a ser profesor, solo cambiando tu etiqueta RBAC tendrás los permisos correctos al instante.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Active Directory",
+    "full": "Directorio Activo",
+    "definition": "¿Qué es?\nEs una enorme herramienta de Microsoft Windows para empresas que funciona como una base de datos central o un gran \"directorio telefónico\" de control.\n\n¿Para qué sirve?\nPermite al informático administrar de forma centralizada todos los ordenadores, contraseñas, permisos y usuarios de una empresa entera desde un único servidor.",
+    "example": "Ejemplo:\nSin Active Directory, si un empleado olvida su contraseña, el informático tendría que ir físicamente a la mesa del empleado a cambiarla. Con Active Directory, el informático lo cambia desde su servidor en un segundo y se aplica en toda la red.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "GPO",
+    "full": "Group Policy Object",
+    "definition": "¿Qué es?\nEs una regla o política que se crea dentro de Active Directory para aplicarla automáticamente a grupos de ordenadores o usuarios.\n\n¿Para qué sirve?\nSirve para obligar a los ordenadores de la empresa a comportarse de una manera segura y concreta, sin que el usuario pueda cambiarlo.\n\nSe relaciona con:\nActive Directory → GPO → Ordenadores de la empresa.",
+    "example": "Ejemplo:\nEl informático crea una GPO que dice: \"Todos los ordenadores del colegio deben bloquear la pantalla si nadie mueve el ratón en 5 minutos, y se prohíbe usar fondos de pantalla de escritorio personalizados\". Al encender los ordenadores, todos obedecen la regla.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Criptografía asimétrica",
+    "full": "",
+    "definition": "¿Qué es?\nEs un sistema de seguridad matemático brillante que utiliza DOS llaves diferentes pero conectadas entre sí: una llave PÚBLICA (que le das a todo el mundo) y una llave PRIVADA (que guardas en secreto).\n\n¿Para qué sirve?\nSirve para comunicarse con seguridad a través de Internet. La regla de oro es:\nLo que se cifra con la llave pública de alguien, SOLO se puede descifrar con su llave privada.\n\nProcedimiento:\nQuiero enviarle un secreto a Ana → Uso la llave pública de Ana para cifrarlo → El mensaje viaja por Internet hecho un desastre → Llega a Ana → Ana usa su llave privada para descifrarlo.",
+    "example": "Ejemplo:\nEs como si repartieras candados abiertos (llave pública) a todos tus amigos. Cualquiera puede meter una carta en una caja y cerrarla con tu candado. Pero, una vez cerrada, nadie puede abrirla, ni siquiera el que la cerró. Solo tú tienes la llave maestra (llave privada) para abrir esas cajas.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "TLS",
+    "full": "Transport Layer Security",
+    "definition": "¿Qué es?\nEs un protocolo de seguridad que utiliza la criptografía asimétrica para proteger los datos mientras viajan por los cables de Internet.\n\n¿Para qué sirve?\nSirve para garantizar la confidencialidad (nadie puede leerlo) y la integridad (nadie puede modificarlo) de tus comunicaciones web.\n\nSe relaciona con:\nHTTP (Inseguro) + TLS = HTTPS (Navegación segura).",
+    "example": "Ejemplo:\nCuando metes los datos de tu tarjeta de crédito en una tienda online, TLS envuelve esos números en una capa protectora matemática indescifrable antes de enviarlos por el Wi-Fi.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Nmap",
+    "full": "Network Mapper",
+    "definition": "¿Qué es?\nEs un programa de línea de comandos (se usa escribiendo texto) que sirve para explorar redes informáticas. Es la herramienta principal para la fase de \"descubrimiento\" en una auditoría.\n\n¿Para qué sirve?\nSirve para escanear una red y descubrir qué ordenadores están encendidos, qué puertos (puertas) tienen abiertos y qué servicios están ofreciendo.\n\nSe relaciona con:\nRed → Nmap → Hosts vivos → Puertos abiertos → Servicios.",
+    "example": "Ejemplo:\nUn experto en seguridad conecta su portátil a la red del colegio, usa Nmap y descubre en 10 segundos que hay 50 ordenadores encendidos y uno de ellos tiene el peligroso puerto 23 (Telnet) abierto y expuesto.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap -sS",
+    "full": "TCP SYN Scan",
+    "definition": "¿Qué es?\nEs un tipo de escaneo de puertos de Nmap, conocido como escaneo sigiloso o \"Stealth Scan\".\n\n¿Cómo funciona?\nUtiliza solo el primer paso del saludo TCP:\n1. Nmap envía un mensaje SYN (hola) a un puerto.\n2. El servidor responde SYN-ACK (hola, estoy abierto).\n3. En lugar de terminar el saludo con un ACK, Nmap corta la conexión de golpe enviando un mensaje RST.\n\n¿Para qué sirve?\nSirve para averiguar si un puerto está abierto sin completar la conexión, lo que ayuda a no dejar tantos rastros en los registros del servidor atacado.",
+    "example": "Ejemplo:\nEs como llamar a la puerta de una casa, escuchar que alguien dice \"¡Voy!\", y salir corriendo antes de que te vean la cara. Ya sabes que hay alguien dentro, pero no has entrado.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap -sU",
+    "full": "UDP Scan",
+    "definition": "¿Qué es?\nEs el comando de Nmap para buscar puertos abiertos que utilicen el protocolo UDP.\n\n¿Para qué sirve?\nDado que UDP no responde con saludos confirmados, este escaneo es más lento y complejo, pero es obligatorio para encontrar vulnerabilidades en servicios que no usan TCP, como DNS.",
+    "example": "Ejemplo:\nSi pones `nmap -sU`, la herramienta enviará paquetes rápidos y sin conexión a las puertas UDP y esperará pacientemente a ver si el servidor reacciona o devuelve un mensaje de error.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap -T0 a -T5",
+    "full": "Plantillas de temporización de Nmap",
+    "definition": "¿Qué es?\nSon comandos que controlan la velocidad y agresividad a la que Nmap dispara sus paquetes de escaneo.\n\n¿Para qué sirve?\n- T0 es \"Paranoico\" (muy, muy lento). Se usa para no levantar sospechas en las alarmas de seguridad.\n- T5 es \"Loco\" (extremadamente rápido). Dispara todo de golpe, pero puede colapsar la red.\n- T4 es el equilibrio rápido normal que se usa en redes modernas.",
+    "example": "Ejemplo:\nAl escribir `nmap -T4 192.168.1.1`, le estás pidiendo a Nmap que haga el escaneo rápido porque asumes que la red de tu oficina es moderna y aguanta bien el tráfico.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap -A, -sV y -O",
+    "full": "Detección avanzada",
+    "definition": "¿Qué es?\nSon opciones que le dicen a Nmap que investigue más profundamente los puertos abiertos.\n\nFunciones:\n-sV → Intenta averiguar exactamente qué versión de programa está usando un puerto abierto.\n-O → Intenta adivinar qué sistema operativo (Windows, Linux, Mac) tiene el ordenador.\n-A → Es el botón de \"todo a la vez\", activa -sV, -O y herramientas extra de investigación.",
+    "example": "Ejemplo:\nDescubres el puerto 80 abierto. Con `nmap -sV`, el programa habla un poco con el servidor y descubre: \"Tiene el puerto 80 abierto usando el programa Apache versión 2.4\".",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap -p y -sn",
+    "full": "",
+    "definition": "¿Qué es?\nSon parámetros para controlar el tamaño de la búsqueda en Nmap.\n\n-p → Sirve para especificar exactamente qué puertos quieres mirar (para no perder tiempo buscando en los 65.535 puertos).\n-sn → Sirve para hacer solo un \"Ping Scan\". Descubre qué ordenadores están encendidos en la red, pero NO escanea sus puertos.",
+    "example": "Ejemplo:\n`nmap -p 80,443` buscará solamente los dos puertos de páginas web. \n`nmap -sn` te dará una lista rápida de todos los teléfonos y PCs conectados a tu Wi-Fi, sin comprobar sus puertas.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "NSE",
+    "full": "Nmap Scripting Engine",
+    "definition": "¿Qué es?\nEs un motor incorporado en Nmap que permite ejecutar pequeños programas (llamados scripts) escritos por la comunidad de ciberseguridad.\n\n¿Para qué sirve?\nSirve para automatizar tareas avanzadas, como comprobar si un puerto abierto es vulnerable a un ataque famoso en concreto o intentar extraer información extra de forma automática.",
+    "example": "Ejemplo:\nEn vez de escanear a mano, le dices a NSE: \"Usa el script de vulnerabilidades contra este puerto 445\". Nmap lo escanea y te responde: \"Atención, este equipo es vulnerable a WannaCry\".",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Zenmap",
+    "full": "",
+    "definition": "¿Qué es?\nEs la interfaz gráfica oficial del programa Nmap.\n\n¿Para qué sirve?\nSirve para usar todo el poder de Nmap pero con ventanas, botones para hacer clic, y gráficos que dibujan mapas de la red visualmente, sin tener que memorizar comandos de texto.",
+    "example": "Ejemplo:\nNmap es como el motor desnudo de un coche; Zenmap le pone un volante, pedales y una pantalla para que sea mucho más cómodo y visual de conducir.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Wireshark",
+    "full": "",
+    "definition": "¿Qué es?\nEs un programa analizador de protocolos de red (un \"husmeador\" o sniffer). Se encarga de atrapar, registrar y mostrar absolutamente todos los paquetes de datos que circulan por tu tarjeta de red o Wi-Fi.\n\n¿Para qué sirve?\nSirve para ver \"en las tripas\" de la red. Permite investigar por qué algo no funciona, leer comunicaciones no cifradas y descubrir si un atacante está haciendo cosas raras en la red.\n\nSe relaciona con:\nRed → captura paquetes → Wireshark → análisis profundo.",
+    "example": "Ejemplo:\nAbres Wireshark y entras en una página HTTP (sin candado). En Wireshark podrás ver literalmente tu contraseña viajando por el cable letra por letra.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Filtros de Wireshark",
+    "full": "",
+    "definition": "¿Qué es?\nSon comandos de búsqueda que se escriben en la barra superior de Wireshark.\n\n¿Para qué sirve?\nComo Wireshark captura miles de paquetes por segundo, la pantalla es un caos ilegible. Los filtros sirven para limpiar la pantalla y mostrar únicamente el tipo de tráfico que quieres investigar.\n\nFiltros comunes:\n`dhcp` → Muestra solo asignaciones de IP.\n`dns` → Muestra solo traducciones de nombres.\n`http` → Muestra solo navegación web sin cifrar.",
+    "example": "Ejemplo:\nAlguien se queja de que no le dan IP automática. Escribes `dhcp` en Wireshark y ves que el ordenador hace un montón de peticiones `Discover`, pero no hay ningún mensaje `Offer`. Ya sabes que el servidor DHCP está caído.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Comando ping y ping -t",
+    "full": "",
+    "definition": "¿Qué es?\nEs un comando súper básico que manda un paquetito de datos a otra IP para ver si la otra máquina está encendida y responde (como hacer sonar un sonar: ¡ping! ... ¡pong!).\n\n¿Para qué sirve?\nSirve para comprobar si tienes conectividad con otro equipo. \nLa opción `-t` hace que el ping no pare nunca, comprobando la conexión infinitamente.",
+    "example": "Ejemplo:\nTienes cortes raros en el Internet. Dejas corriendo `ping -t 8.8.8.8` (hacia Google) en tu PC. Si ves que cada rato aparece \"Tiempo de espera agotado\", sabes que tu conexión se está cortando intermitentemente.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Scope / Alcance",
+    "full": "Alcance de la auditoría",
+    "definition": "¿Qué es?\nEs el documento y conjunto de reglas que definen exactamente qué ordenadores, servidores y sistemas tienes autorización legal para escanear y atacar durante una auditoría.\n\n¿Para qué sirve?\nEs la diferencia entre ser un profesional (Pentester) y un criminal. Nunca puedes auditar sistemas que no estén dentro de tu Scope autorizado.\n\nSe relaciona con:\nÉtica → Autorización → Scope → Nmap.",
+    "example": "Ejemplo:\nLa empresa te contrata y el Scope dice: \"Puedes escanear las IP de la 1 a la 50, pero no toques la 51 que es el servidor del hospital\". Si escaneas la 51, estás cometiendo un delito, aunque lo hicieras sin mala intención.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Rogue AP / Honeypot Wi-Fi",
+    "full": "Puntos de acceso trampa",
+    "definition": "¿Qué es?\nUn Rogue AP es una red Wi-Fi maliciosa creada por un atacante. Un Honeypot es un sistema trampa creado por los defensores para atraer y estudiar atacantes.\n\n¿Para qué sirve?\n- El Rogue AP engaña a las víctimas para que se conecten a él en lugar del Wi-Fi real (por ejemplo, llamándose \"Starbucks_Gratis\"), permitiendo al atacante capturar todo su tráfico con Wireshark.\n- El Honeypot parece vulnerable a propósito. Cuando un atacante intenta hackearlo, los defensores reciben una alerta y pueden estudiar cómo ataca.",
+    "example": "Ejemplo de Rogue AP:\nEnciendes tu móvil en el centro comercial y se conecta solo al Wi-Fi \"CentroComercial_Free\". En realidad es el ordenador portátil de un atacante sentado en una mesa interceptando contraseñas.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  }
+);
+SEED_DATA.push(
+  {
+    "term": "Burp Suite Professional",
+    "full": "",
+    "definition": "¿Qué es?\nEs una herramienta avanzada que funciona como un intermediario (proxy) para analizar y modificar todo el tráfico entre un navegador web y una página o aplicación.\n\n¿Para qué sirve?\nSirve para auditar la seguridad de aplicaciones web. Un auditor puede detener una petición antes de que llegue al servidor, modificar los datos invisibles y ver cómo reacciona la página.\n\nSe relaciona con:\nNavegador ↔ Burp Suite ↔ Servidor web",
+    "example": "Ejemplo de laboratorio:\nAl hacer clic en \"Comprar\" en una tienda de pruebas, Burp Suite detiene la conexión. El auditor cambia el precio oculto del producto de \"50€\" a \"0€\" y deja que la petición continúe, comprobando si el servidor se da cuenta de la trampa.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "BloodHound",
+    "full": "",
+    "definition": "¿Qué es?\nEs una herramienta gráfica de análisis que utiliza la teoría de grafos matemáticos para dibujar relaciones ocultas y permisos dentro de un entorno de Active Directory.\n\n¿Para qué sirve?\nSirve para que un pentester (o defensor) pueda visualizar mapas de ataque. Muestra caminos lógicos para escalar privilegios desde un usuario básico hasta conseguir el control total de la red.\n\nSe relaciona con:\nUsuarios → Grupos → Permisos → Equipos (Active Directory).",
+    "example": "Ejemplo autorizado:\nEl auditor introduce los datos en BloodHound y la pantalla dibuja una ruta: Si hackeas al usuario \"Recepcionista\", que a su vez es administrador del equipo \"Impresora\", puedes robar la contraseña del \"Informático\" que también se conectó a esa impresora.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Impacket",
+    "full": "",
+    "definition": "¿Qué es?\nEs un conjunto de herramientas y librerías escritas en Python que permiten interactuar a muy bajo nivel con los protocolos de red propios de Microsoft Windows (como SMB, Kerberos o LDAP).\n\n¿Para qué sirve?\nSe utiliza en auditorías para probar fallos de seguridad en redes corporativas sin necesidad de usar un ordenador Windows real.\n\nSe relaciona con:\nKali Linux → Impacket → Red Windows",
+    "example": "Ejemplo autorizado:\nEl auditor utiliza un script de Impacket desde su ordenador con Linux para hablar el protocolo SMB de Windows y probar si un servidor empresarial vulnerable le permite ejecutar un comando a distancia.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "CrackMapExec / NetExec",
+    "full": "",
+    "definition": "¿Qué es?\nSon herramientas de automatización de seguridad, muy famosas en la evaluación de redes Windows y Active Directory.\n\n¿Para qué sirve?\nSirven para auditar de forma masiva miles de equipos a la vez. Permiten comprobar si una contraseña o vulnerabilidad funciona en toda la red de la empresa en cuestión de segundos.\n\nSe relaciona con:\nPentesting → NetExec → Active Directory",
+    "example": "Ejemplo autorizado:\nEl equipo de seguridad quiere comprobar que nadie usa contraseñas fáciles. Ejecutan NetExec con la lista de usuarios y la contraseña \"Verano2024\". En dos segundos, la herramienta escanea 500 ordenadores y alerta de que tres trabajadores la están utilizando.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Sliver C2",
+    "full": "Command and Control",
+    "definition": "¿Qué es?\nEs un \"framework\" (entorno de trabajo) utilizado para controlar múltiples ordenadores comprometidos al mismo tiempo desde un servidor central. C2 significa Comando y Control.\n\n¿Para qué sirve?\nLo utilizan los equipos de Red Team durante simulaciones autorizadas para imitar cómo se comportaría una red de malware avanzada (botnet) atacando a la empresa, con el objetivo de entrenar a las defensas.\n\nSe relaciona con:\nEquipo de pruebas → Servidor C2 → Sistemas de laboratorio controlados",
+    "example": "Ejemplo de laboratorio:\nEl equipo de ataque autorizado (Red Team) envía un correo falso. Cuando un trabajador simulado abre el archivo, ese ordenador se conecta al servidor Sliver C2 del Red Team, que ahora puede enviarle comandos remotamente.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Kali Linux",
+    "full": "",
+    "definition": "¿Qué es?\nEs una distribución (versión) del sistema operativo Linux que viene de fábrica con cientos de herramientas de ciberseguridad preinstaladas.\n\n¿Para qué sirve?\nSirve como el \"maletín de herramientas\" estándar de un pentester. En lugar de instalar Nmap, Wireshark, Burp Suite, Impacket, etc. uno por uno, todo viene configurado y listo para usarse en auditorías y laboratorios.",
+    "example": "Ejemplo:\nUn estudiante de ciberseguridad instala Kali Linux en una máquina virtual para tener de inmediato todas las herramientas necesarias para empezar a aprender a escanear redes.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Packet Tracer",
+    "full": "Cisco Packet Tracer",
+    "definition": "¿Qué es?\nEs un programa simulador de redes muy visual creado por Cisco.\n\n¿Para qué sirve?\nPermite a los estudiantes arrastrar routers, switches y ordenadores virtuales a la pantalla y conectarlos con cables imaginarios para practicar configuraciones de red complejas sin tener que comprar equipos físicos muy caros.\n\nSe relaciona con:\nPráctica teórica → Packet Tracer → Simulación de tráfico",
+    "example": "Ejemplo:\nDibujas en la pantalla un PC, un Switch y un Servidor DHCP. Configuras el servidor y haces doble clic en el PC para comprobar cómo automáticamente ha recibido una dirección IP a través de la red virtual que acabas de construir.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Activo",
+    "full": "",
+    "definition": "¿Qué es?\nEn ciberseguridad, un activo es cualquier cosa (física o digital) que tiene valor para una persona o empresa y que necesita ser protegida.\n\n¿Para qué sirve?\nIdentificar los activos es el primer paso antes de intentar defender una organización. No puedes proteger algo que no sabes que tienes ni cuánto vale.\n\nSe relaciona con:\nActivo → Amenaza → Vulnerabilidad → Riesgo",
+    "example": "Ejemplo:\nEn un instituto, los activos son: los ordenadores (físico), la base de datos de notas (digital), y la reputación del centro (intangible).",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Amenaza",
+    "full": "",
+    "definition": "¿Qué es?\nEs algo o alguien externo o interno que tiene el potencial de causar un daño o destruir un activo valioso.\n\n¿Para qué sirve entenderlo?\nSirve para prepararnos frente a los peligros reales que existen.\n\nTipos:\nPueden ser humanas (un hacker, un empleado despistado) o naturales (un incendio, una inundación).",
+    "example": "Ejemplo:\nUn virus de tipo ransomware (software malicioso) en Internet es una amenaza. Un rayo cayendo en la antena de la empresa también es una amenaza.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Vulnerabilidad",
+    "full": "",
+    "definition": "¿Qué es?\nEs una debilidad, fallo o agujero de seguridad, ya sea en un programa informático, en un proceso de la empresa o en las propias personas.\n\n¿Para qué sirve entenderlo?\nSi un atacante (amenaza) encuentra una vulnerabilidad, puede colarse en el sistema y causar daño.\n\nCadena:\nAmenaza + Vulnerabilidad = ¡Ataque posible!",
+    "example": "Ejemplo:\nTienes un servidor muy caro (Activo). Pero el informático olvidó actualizar Windows hace 3 años (Vulnerabilidad). Esa debilidad permite que cualquier atacante (Amenaza) logre entrar sin esfuerzo.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Riesgo",
+    "full": "",
+    "definition": "¿Qué es?\nEs la posibilidad calculada de que una amenaza concreta aproveche una vulnerabilidad para causar un daño y pérdida a la empresa.\n\n¿Para qué sirve?\nAyuda a los jefes a decidir dónde gastar el presupuesto de seguridad matemático utilizando esta fórmula conceptual:\nRiesgo = Probabilidad × Impacto\n\nProcedimiento:\nEvalúas qué tan posible es que pase algo (Probabilidad) y cuánto daño haría (Impacto). Si ambos son altos, el riesgo es extremo.",
+    "example": "Ejemplo:\nEl riesgo de que caiga un meteorito (Amenaza) y destruya el edificio (Activo) tiene un Impacto gigantesco, pero una Probabilidad casi nula. El riesgo total es bajo, por lo que no compramos un escudo antimetoritos.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Incidente de seguridad",
+    "full": "",
+    "definition": "¿Qué es?\nEs cuando la teoría se convierte en realidad. Un acontecimiento confirmado que ha afectado o comprometido la seguridad (confidencialidad, integridad o disponibilidad) de la organización.\n\n¿Para qué sirve distinguirlo?\nUn riesgo es algo que \"podría pasar\". Un incidente es algo que \"ya está pasando o acaba de pasar\" y requiere una respuesta de emergencia.\n\nSe relaciona con:\nVulnerabilidad → Ataque → Datos expuestos → ¡Incidente de Seguridad!",
+    "example": "Ejemplo:\nEl administrador ve en la pantalla que están borrando la base de datos de clientes desde una conexión rusa desconocida. Eso es un incidente de seguridad en curso.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Controles preventivos y reactivos",
+    "full": "",
+    "definition": "¿Qué es?\nSon las medidas (contramedidas) que ponemos para reducir los riesgos.\n\nDiferencia principal:\n1. Preventivo: Su objetivo es evitar que el problema ocurra antes de que pase.\n2. Reactivo (o de continuidad): Su objetivo es saber cómo responder, curar o arreglar el sistema después de que el daño ya esté hecho.",
+    "example": "Ejemplo:\nPreventivo → Instalar un antivirus, exigir contraseñas largas y poner un guarda de seguridad en la puerta del servidor.\nReactivo → Tener una buena copia de seguridad (backup) y extintores contra incendios.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "DHCP Rogue",
+    "full": "Servidor DHCP no autorizado",
+    "definition": "¿Qué es?\nEs un ataque donde alguien conecta a la red un dispositivo malicioso configurado para actuar como un servidor DHCP falso (Rogue).\n\n¿Qué intenta conseguir?\nIntenta responder a las peticiones de los ordenadores de la red antes que el servidor legítimo, entregándoles información falsa (como un DNS controlado por el atacante).\n\nProcedimiento:\nCliente → Envía \"DHCP Discover\" a toda la red.\nDHCP Rogue → Contesta hiper-rápido \"¡Yo soy el servidor! Toma esta configuración trampa\".\n\nConsecuencia:\nEl tráfico de los usuarios pasará ahora por los equipos del atacante.",
+    "example": "Ejemplo:\nUn alumno lleva su propio router al colegio, lo enchufa a una toma de la pared y de repente todos los PCs de la clase dejan de tener Internet porque el router del alumno les está dando configuraciones incorrectas.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Man-in-the-Middle (MitM)",
+    "full": "Hombre en el medio",
+    "definition": "¿Qué es?\nEs un tipo de ataque conceptual donde una persona o dispositivo se coloca sigilosamente entre dos partes que se están comunicando, interceptando toda la información.\n\n¿Qué intenta conseguir?\nIntenta escuchar conversaciones privadas, robar contraseñas, o incluso modificar los datos al vuelo antes de enviarlos a su destino final, sin que el origen ni el destino se enteren.\n\nSe relaciona con:\nDHCP Spoofing → Gateway manipulado → Tráfico pasa por el atacante → MitM.",
+    "example": "Ejemplo:\nTú crees que hablas con el servidor de tu banco. En realidad:\nTú → (Usuario atacante leyendo todo) → Banco de verdad.\nEs como el cartero abriendo tus cartas, leyéndolas, cerrándolas y entregándolas en el buzón sin que te des cuenta.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "DNS Spoofing / Redirection",
+    "full": "Falsificación o manipulación de DNS",
+    "definition": "¿Qué es?\nEs un ataque que envenena o manipula la agenda de Internet (el sistema DNS) para engañar al ordenador de la víctima.\n\n¿Qué intenta conseguir?\nHacer que, cuando el usuario escriba una página legítima en su navegador, el sistema le redirija a una página falsa idéntica controlada por el atacante.\n\nProcedimiento:\nUsuario escribe \"banco.com\" → Consulta DNS → Servidor DNS manipulado responde con la IP del servidor falso (1.2.3.4) → El usuario introduce sus claves en la web del hacker.",
+    "example": "Ejemplo:\nEscribes \"facebook.com\" y tu pantalla muestra el Facebook de siempre. Pero en realidad estás en un servidor en China preparado para guardar tu contraseña, todo porque el DNS que usas fue falsificado.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "SQL Injection (SQLi)",
+    "full": "Inyección SQL",
+    "definition": "¿Qué es?\nEs una vulnerabilidad extremadamente peligrosa en las aplicaciones web. Ocurre cuando el servidor web coge directamente lo que el usuario escribe en un formulario y lo inserta como código en la base de datos sin filtrarlo.\n\n¿Qué intenta conseguir?\nPermite al atacante escribir comandos destructivos o de consulta en campos de texto normales (como un buscador) para robar, modificar o borrar toda la base de datos de la empresa.\n\nSe relaciona con:\nUsuario → Formulario web vulnerable → Entrada manipulada → Ejecución en base de datos SQL.",
+    "example": "Ejemplo:\nEn la caja del nombre de usuario para iniciar sesión, el atacante escribe `admin' OR '1'='1`. El sistema vulnerable lo procesa literalmente como \"Inicia sesión si el usuario es admin O SI 1 ES IGUAL A 1\". Como 1 es igual a 1, le deja entrar sin contraseña.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Verbose Error Handling",
+    "full": "Manejo de errores excesivamente detallado",
+    "definition": "¿Qué es?\nEs un fallo de configuración en páginas web o aplicaciones, donde al ocurrir un error, el servidor muestra en la pantalla toda la información interna técnica en lugar de un mensaje genérico.\n\n¿Qué intenta conseguir?\nLos desarrolladores lo dejan activado por comodidad para arreglar fallos, pero da pistas perfectas a los atacantes sobre cómo hackear el servidor.\n\nSe relaciona con:\nInformación interna expuesta → Facilita ataques como Inyección SQL.",
+    "example": "Ejemplo:\nAl intentar poner una comilla ( ' ) en el buscador de la tienda, la página se rompe y te dice en rojo: \"Error de sintaxis en el servidor MySQL versión 8.0 al consultar la tabla clientes_vip columna tarjeta_credito\". Le acabas de regalar al atacante el mapa de tu base de datos.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "IoT y Seguridad",
+    "full": "Internet of Things (Internet de las Cosas)",
+    "definition": "¿Qué es?\nSon aparatos cotidianos que tradicionalmente no tenían Internet, pero que ahora están conectados a la red (bombillas inteligentes, aspiradores, cámaras de bebés, enchufes o termostatos).\n\n¿Cuál es el riesgo?\nSuelen ser muy baratos y sus fabricantes rara vez se preocupan por la seguridad. Muchos vienen con contraseñas por defecto de fábrica, sistemas operativos básicos y nunca reciben actualizaciones (parches).\n\nConsecuencia:\nSon la puerta de entrada más fácil para un atacante a la red de tu casa o empresa.",
+    "example": "Ejemplo:\nEl casino instala un termostato de pecera inteligente para controlar el agua. Un hacker ataca la escasa seguridad del termostato, entra por ahí a la red interna y roba los datos de los clientes VIP del casino.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Riesgo de Cadena de Suministro",
+    "full": "Supply Chain Risk",
+    "definition": "¿Qué es?\nEs un riesgo de seguridad provocado por la confianza que tenemos en componentes, empresas o programas de terceros.\n\n¿Qué intenta explicar?\nSignifica que tu empresa puede tener una seguridad informática perfecta, pero si hackean a la empresa que te provee el software o las piezas del ordenador (tu cadena de suministro), acabas infectado indirectamente.\n\nSe relaciona con:\nEmpresa segura ↔ Proveedor externo débil ↔ Atacante.",
+    "example": "Ejemplo:\nInstalas una actualización oficial de tu programa de contabilidad. Pero el atacante había hackeado a los creadores de ese programa, infectando la actualización original. Entran en tu empresa sin ni siquiera atacarte a ti directamente.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Segmentación de IoT",
+    "full": "Aislamiento de dispositivos mediante VLAN",
+    "definition": "¿Qué es?\nEs una de las contramedidas más eficaces para protegerse de los riesgos del Internet de las Cosas.\n\n¿Para qué sirve?\nSirve para encerrar lógicamente a todos los aparatos dudosos en un \"corral\" (una VLAN dedicada) dentro de la red. Así, si hackean una bombilla inteligente, el atacante no podrá alcanzar tu ordenador con tus archivos del banco.\n\nSe relaciona con:\nVLAN de Usuarios → Aislada de → VLAN de IoT",
+    "example": "Ejemplo:\nEn la empresa creamos la \"VLAN-30\" solo para cámaras de vigilancia y neveras conectadas. Configuramos el firewall para que nada de lo que ocurra en la VLAN-30 pueda cruzar a la red de los ordenadores principales.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  }
+);
+SEED_DATA.push(
+  {
+    "term": "BIA",
+    "full": "Business Impact Analysis",
+    "definition": "¿Qué es?\nEs un estudio profundo que analiza qué consecuencias tendría para la empresa si uno de sus procesos importantes dejara de funcionar por culpa de un desastre o un ciberataque.\n\n¿Para qué sirve?\nSirve para identificar cuáles son los sistemas más críticos de la empresa. Si hay un incendio, el BIA te dice qué servidor hay que salvar primero porque es el que hace perder más dinero.\n\nSe relaciona con:\nProceso importante → BIA → Impacto → RTO / RPO",
+    "example": "Ejemplo:\nUna tienda online realiza un BIA. Descubren que si la web de ventas cae (Web caída), pierden 10.000€ por hora. Pero si el servidor de nóminas de los empleados cae, no pasa nada grave siempre que se arregle antes de fin de mes.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "DRP",
+    "full": "Disaster Recovery Plan",
+    "definition": "¿Qué es?\nEs el Plan de Recuperación ante Desastres. Es el documento paso a paso que explica cómo resucitar los sistemas informáticos después de una catástrofe.\n\n¿Para qué sirve?\nSirve para que, en medio del caos (un hackeo masivo o un incendio), los informáticos no tengan que pensar, sino simplemente seguir las instrucciones probadas para recuperar el servicio.\n\nSe relaciona con:\nBIA (identifica lo importante) → DRP (explica cómo recuperarlo) → Recuperación exitosa.",
+    "example": "Ejemplo:\nEl servidor de clientes arde. El equipo de TI abre el DRP, que indica: \"Paso 1: Llamar al proveedor cloud. Paso 2: Descargar el backup diferencial de ayer. Paso 3: Volcar los datos en el servidor de reserva 2\".",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "SLA",
+    "full": "Service Level Agreement",
+    "definition": "¿Qué es?\nEs el Acuerdo de Nivel de Servicio. Es un contrato escrito entre un proveedor y un cliente que define la calidad y el tiempo exacto en el que el servicio debe funcionar.\n\n¿Para qué sirve?\nSirve para garantizar unas condiciones. Si el proveedor de Internet incumple el acuerdo y te deja sin conexión más tiempo del pactado, tiene que compensarte económicamente.",
+    "example": "Ejemplo:\nLa empresa contrata un servidor en la nube con un SLA de \"99.9% de disponibilidad y atención telefónica en menos de 15 minutos\". Si el servidor cae y tardan 2 horas en contestar, incumplen el SLA.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "RTO",
+    "full": "Recovery Time Objective",
+    "definition": "¿Qué es?\nEs el \"Objetivo de Tiempo de Recuperación\". Indica el cronómetro de urgencia: cuánto tiempo máximo podemos estar con el servicio roto antes de que la empresa se vaya a la ruina.\n\n¿Para qué sirve?\nSirve para diseñar la velocidad del sistema de copias de seguridad. Si tu RTO es de 5 minutos, necesitas sistemas duplicados millonarios; si es de 3 días, puedes usar sistemas más lentos y baratos.\n\nSe relaciona con:\nDesastre → empieza a contar el reloj → RTO (Límite para levantar el servicio).",
+    "example": "Ejemplo:\nEl RTO del servidor de correo electrónico de una oficina es de 4 horas. Si el servidor se cae a las 09:00, el equipo informático tiene obligatoriamente hasta las 13:00 para hacer que vuelva a funcionar.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "RPO",
+    "full": "Recovery Point Objective",
+    "definition": "¿Qué es?\nEs el \"Objetivo de Punto de Recuperación\". Indica cuánta información (medida en tiempo) está dispuesta a perder la empresa como máximo.\n\n¿Para qué sirve?\nSirve para saber cada cuánto tiempo hay que hacer una copia de seguridad. Si tu RPO es de 24 horas, hacer copias por la noche es suficiente. Si tu RPO es de 10 minutos, necesitas hacer copias continuamente.\n\nSe relaciona con:\nÚltima copia guardada → tiempo sin copiar datos (RPO) → Desastre",
+    "example": "Ejemplo:\nUn banco tiene un RPO de cero. No pueden permitirse perder ni un segundo de transacciones. Un instituto tiene un RPO de 24 horas; si se pierde lo del último día, los profesores pueden volver a meter las notas a mano sin quebrar el centro.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Recogida de información (BIA)",
+    "full": "",
+    "definition": "¿Qué es?\nSon los métodos que se utilizan en una empresa para averiguar qué procesos son los más importantes antes de escribir el documento BIA.\n\n¿Para qué sirve?\nEl informático no siempre sabe qué hace cada departamento. Por eso necesita hablar con los trabajadores para calcular el impacto real de un apagón.\n\nProcedimiento de recogida:\nFormularios → Entrevistas → Personal TIC → Usuarios → Análisis de procesos",
+    "example": "Ejemplo:\nEl informático entrevista al jefe de ventas: \"¿Qué pasa si la web de ventas cae un martes a las 3 am?\". Jefe de ventas: \"Nada, no vendemos de madrugada\". Informático: \"¿Y un viernes a las 18h?\". Jefe: \"Perdemos 5.000€ la hora\". Esa información va al BIA.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "MAGERIT",
+    "full": "Metodología de Análisis y Gestión de Riesgos",
+    "definition": "¿Qué es?\nEs la metodología oficial creada por el gobierno de España (referenciada en los esquemas nacionales) para enseñar a las instituciones a evaluar de forma sistemática y oficial los riesgos informáticos.\n\n¿Para qué sirve?\nSirve como guía o manual de instrucciones oficial en tres tomos (Método, Catálogo y Técnicas) para que no te olvides de ningún paso al calcular los peligros que acechan a tus servidores.",
+    "example": "Ejemplo:\nEl Ayuntamiento de un pueblo quiere certificar la seguridad de su base de datos del padrón. Utilizan la guía oficial de MAGERIT versión 3 para analizar qué amenazas podrían robar esos datos.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Tratamiento del riesgo",
+    "full": "Evitar, Mitigar, Transferir, Aceptar",
+    "definition": "¿Qué es?\nSon las cuatro decisiones matemáticas y de negocio que una empresa puede tomar después de descubrir un peligro de seguridad.\n\n1. Evitar: Cortar el problema de raíz (si el servidor da problemas, lo apago y uso otro).\n2. Mitigar: Poner tiritas y escudos (instalar antivirus y firewall para reducir el riesgo).\n3. Transferir: Pasarle el problema a otro (contratar un ciberseguro para que pague si me hackean).\n4. Aceptar: No hacer nada (el riesgo es tan pequeño que cuesta más arreglarlo que ignorarlo).\n\nSe relaciona con:\nAnálisis del riesgo → Decisión → Tratamiento",
+    "example": "Ejemplo de Aceptar:\nHay un 0.01% de probabilidad de que roben un ratón de ordenador de 5€. Mitigar el riesgo costaría 100€ en una cerradura. Decisión: Aceptar el riesgo, si lo roban compro otro.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "SGSI",
+    "full": "Sistema de Gestión de la Seguridad de la Información",
+    "definition": "¿Qué es?\nEs un conjunto de reglas, políticas y procesos (a menudo basados en la norma ISO 27001) que una empresa adopta de forma permanente para proteger sus datos día tras día.\n\n¿Para qué sirve?\nSirve para convertir la seguridad en una rutina organizada y documentada, en lugar de arreglar cosas improvisando cuando ya hay un virus en la red.\n\nSe relaciona con:\nEmpresa → identifica riesgos → aplica controles → revisa (SGSI) → mejora",
+    "example": "Ejemplo:\nGracias al SGSI, todos los empleados saben que deben cambiar la contraseña cada 3 meses, el informático sabe que debe revisar el firewall los lunes, y los jefes hacen una auditoría en diciembre.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "PDCA",
+    "full": "Plan, Do, Check, Act",
+    "definition": "¿Qué es?\nEs el ciclo de mejora continua (Círculo de Deming) sobre el que gira toda la gestión de ciberseguridad corporativa y el SGSI.\n\n¿Cómo funciona?\n- Planificar (Plan): Estudiar los riesgos y escribir qué controles vamos a poner.\n- Hacer (Do): Instalar los firewalls y enseñar a los empleados.\n- Comprobar (Check): Revisar si los hackers logran pasar los firewalls.\n- Actuar (Act): Si han pasado, mejorar la configuración y volver a Planificar.",
+    "example": "Ejemplo:\nPlanificamos usar contraseñas largas (Plan). Exigimos usar contraseñas largas a todos (Do). Auditamos y descubrimos que la gente las apunta en post-its en la pantalla (Check). Castigamos esa práctica y cambiamos el sistema a huella dactilar (Act).",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "GAP de seguridad",
+    "full": "Brecha o diferencia de estado",
+    "definition": "¿Qué es?\nEs la diferencia técnica matemática entre el nivel de seguridad que tenemos hoy (Estado Actual) y el nivel de seguridad ideal y legal que deberíamos tener (Estado Objetivo).\n\n¿Para qué sirve?\nSirve para hacer una lista de tareas de todo lo que la empresa tiene que comprar o configurar para estar al 100% segura.\n\nProcedimiento:\nObjetivo: \"MFA para todos\" \nRealidad: \"Solo la mitad lo usa\" \nGAP: \"Falta instalar MFA en el 50% de la empresa\"",
+    "example": "Ejemplo:\nEl Estado Objetivo exige cifrar todos los discos duros con BitLocker. Tras revisar los portátiles, hay 10 sin cifrar. Esos 10 portátiles son el \"GAP de seguridad\" que hay que resolver.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "SoA",
+    "full": "Statement of Applicability (Declaración de Aplicabilidad)",
+    "definition": "¿Qué es?\nEs un documento oficial obligatorio en los estándares de seguridad (como ISO 27001) donde la empresa lista todos los controles de seguridad posibles y justifica cuáles va a usar y cuáles no.\n\n¿Para qué sirve?\nSirve para demostrar a los auditores externos por qué has tomado ciertas decisiones defensivas.",
+    "example": "Ejemplo:\nEn el documento SoA de la empresa, el informático marca la casilla de \"Control de tarjetas de acceso magnéticas\" y escribe al lado: \"No aplica en nuestra empresa, porque trabajamos 100% online y no tenemos oficina física\".",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "RGPD",
+    "full": "Reglamento General de Protección de Datos",
+    "definition": "¿Qué es?\nEs la ley obligatoria de toda la Unión Europea que protege la privacidad de los datos personales (nombre, teléfono, DNI, historial médico) de los ciudadanos.\n\n¿Para qué sirve?\nObliga a las empresas a pedirte permiso claro para usar tus datos, a guardarlos cifrados y a pagar multas millonarias si se los roban por ser negligentes en su ciberseguridad.",
+    "example": "Ejemplo:\nUn hospital almacena historiales médicos en un Word sin contraseña (incumpliendo el RGPD). Si un hacker los roba y los publica, la Unión Europea le pondrá una multa gigantesca al hospital.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "LOPDGDD",
+    "full": "Ley Orgánica de Protección de Datos y Garantía de los Derechos Digitales",
+    "definition": "¿Qué es?\nEs la ley nacional de España que adapta la ley europea (RGPD) a las leyes y peculiaridades españolas, añadiendo además protección para los derechos en Internet (como el derecho a la desconexión digital del trabajo).\n\n¿Para qué sirve?\nSirve como el manual legal exacto que deben cumplir todas las empresas dentro del territorio español respecto a privacidad y cámaras de vigilancia.",
+    "example": "Ejemplo:\nGracias a esta ley, un empleado en España tiene reconocido su derecho a no contestar WhatsApps del jefe el fin de semana, además de estar protegido el uso de su foto personal.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "AEPD",
+    "full": "Agencia Española de Protección de Datos",
+    "definition": "¿Qué es?\nEs el organismo del Estado español encargado de vigilar que todas las empresas, colegios e instituciones cumplan las leyes de privacidad.\n\n¿Para qué sirve?\nEs el \"policía\" de los datos. Si una empresa te molesta con llamadas publicitarias que no autorizaste o sufre una filtración de seguridad grave, los ciudadanos pueden denunciarlo ante la AEPD, y esta entidad investiga y sanciona.",
+    "example": "Ejemplo:\nTu compañía telefónica vende tus datos a otra empresa sin preguntarte. Denuncias el caso a la AEPD. La agencia investiga y multa a la compañía telefónica con 100.000€.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "CPD",
+    "full": "Centro de Procesamiento de Datos (Data Center)",
+    "definition": "¿Qué es?\nEs una instalación física ultra-segura (puede ser una habitación en un colegio o un edificio gigante sin ventanas de Google) donde se guardan los servidores, redes y almacenamiento vital de una organización.\n\n¿Para qué sirve?\nSirve para concentrar todos los equipos delicados en un solo sitio y proporcionarles la máxima protección de frío, electricidad, vigilancia policial e Internet.\n\nSe relaciona con:\nCPD → Perímetro de seguridad → Servidores protegidos",
+    "example": "Ejemplo:\nTodo lo que guardas en \"la nube\" de iCloud o Google Drive, físicamente está en discos duros dentro de un gigantesco CPD en algún lugar del mundo vigilado 24 horas.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Perímetro de seguridad",
+    "full": "",
+    "definition": "¿Qué es?\nSon las barreras físicas que controlan quién puede acercarse o entrar en las zonas sensibles (como el CPD) de una empresa.\n\n¿Para qué sirve?\nDe nada sirve tener el mejor firewall digital del mundo (protección lógica) si cualquier persona de la calle puede entrar andando a la sala de servidores y desconectar el cable de la pared.\n\nSe relaciona con:\nZona pública (calle) → Zona privada (oficinas) → Zona restringida (CPD)",
+    "example": "Ejemplo:\nPara llegar al servidor del banco, el informático tiene que pasar el torno de la puerta (Perímetro 1), luego la tarjeta magnética del pasillo (Perímetro 2) y por último el lector de huellas de la puerta de cristal (Perímetro 3).",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "SAI / UPS",
+    "full": "Sistema de Alimentación Ininterrumpida",
+    "definition": "¿Qué es?\nEs una batería gigante inteligente que se coloca entre el enchufe de la pared y los servidores del CPD.\n\n¿Para qué sirve?\nSi hay un corte de luz en la calle, el UPS entra a funcionar en milisegundos para que los servidores no se apaguen de golpe (lo que rompería los discos). \n\nLimitación:\nNo están diseñados para aguantar horas; solo dan la energía temporal suficiente (unos 15 o 30 minutos) para poder apagar los servidores con seguridad o hasta que el generador de gasolina arranque.",
+    "example": "Ejemplo:\nFallo eléctrico en la ciudad → el CPD se queda a oscuras → las luces rojas del UPS se encienden → los servidores siguen funcionando gracias a la batería del UPS temporalmente.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Generadores y Redundancia eléctrica",
+    "full": "",
+    "definition": "¿Qué es?\nLos generadores son motores (normalmente diésel) que fabrican electricidad. La redundancia eléctrica es la técnica de tener sistemas de corriente alternativos por si el principal falla.\n\n¿Para qué sirve?\nSirven para mantener un CPD encendido durante apagones que duran días.\n\nSe relaciona con:\nCorte de luz → Salta el UPS (batería rápida temporal) → Arranca el generador Diésel (energía a largo plazo).",
+    "example": "Ejemplo:\nSi una excavadora corta el suministro eléctrico del hospital, el UPS mantendrá los servidores vivos durante los primeros 30 segundos, tiempo suficiente para que el motor diésel arranque, haga ruido y devuelva la electricidad total al edificio.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "TIA-942 y NFPA",
+    "full": "Estándares de infraestructura",
+    "definition": "¿Qué es?\nSon documentos internacionales muy técnicos. \n- TIA-942 establece las normas mundiales de cómo se debe construir físicamente y cablear un Centro de Datos.\n- NFPA (National Fire Protection Association) establece las normas de cómo proteger esos equipos eléctricos contra incendios (ej. con gas en vez de con agua).\n\n¿Para qué sirve?\nPara que los arquitectos que construyen un edificio de servidores lo hagan con un estándar mundial de máxima seguridad.",
+    "example": "Ejemplo:\nSi detectan humo en la sala de servidores, la norma NFPA aconseja inundar la sala con un gas especial que apaga el fuego sin dañar los componentes electrónicos, porque si usaran aspersores de agua, destruirían toda la maquinaria.",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "SOC Analyst",
+    "full": "Security Operations Center Analyst",
+    "definition": "¿Qué es?\nEs un profesional de ciberseguridad defensiva que trabaja monitorizando enormes pantallas con datos en un Centro de Operaciones de Seguridad.\n\n¿Para qué sirve?\nSu trabajo es observar todas las alertas de los antivirus y firewalls de la empresa en tiempo real, separar los falsos positivos de los ataques reales, investigar si el hacker ha entrado, y bloquear la amenaza.\n\nSe relaciona con:\nAlertas → Análisis de seguridad → Investigación → Respuesta ante el incidente.",
+    "example": "Ejemplo:\nA las 3:00 de la madrugada, salta una alerta roja en pantalla: \"Conexión inusual a la base de datos desde Rusia\". El SOC Analyst revisa la línea de comandos, confirma que es un ataque, y pulsa el botón para aislar ese servidor de Internet de inmediato.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Pentester",
+    "full": "Penetration Tester",
+    "definition": "¿Qué es?\nEs un auditor informático contratado y autorizado explícitamente y por escrito para intentar hackear el sistema informático de una empresa como si fuera un cibercriminal de verdad.\n\n¿Para qué sirve?\nSirve para encontrar las vulnerabilidades (los agujeros de seguridad) reales que existen en la organización, documentarlas en un informe muy detallado y explicar cómo arreglarlas antes de que las encuentre un cibercriminal ruso.\n\nSe relaciona con:\nAutorización (Scope) → Hackeo ético → Descubrimiento → Informe final.",
+    "example": "Ejemplo:\nEl banco BBVA contrata a un pentester. El pentester busca fallos en la nueva app móvil y descubre que, introduciendo un código SQL (SQLi), puede ver la cuenta de otros clientes. Lo notifica enseguida para que lo arreglen.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Red Team",
+    "full": "Equipo Rojo",
+    "definition": "¿Qué es?\nEs un equipo avanzado de profesionales de seguridad ofensiva que imitan las tácticas sigilosas de los cibercriminales, mafias o estados.\n\n¿Para qué sirve?\nA diferencia de un pentester (que hace ruido probando todo), el Red Team ataca de forma sigilosa durante meses sin que los informáticos de la propia empresa (Blue Team) sepan que es un simulacro, para evaluar si la empresa sabe reaccionar a un ataque real.\n\nSe relaciona con:\nRed Team (Ataca en las sombras) vs Blue Team (Defiende sin saber que es un examen).",
+    "example": "Ejemplo:\nEl Red Team lanza pendrives infectados en el aparcamiento de la empresa para ver si algún empleado lo recoge y lo conecta a su PC de la oficina, iniciando un ataque indetectable desde dentro.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Blue Team",
+    "full": "Equipo Azul",
+    "definition": "¿Qué es?\nEs el equipo de profesionales de ciberseguridad que se dedican íntegramente a defender, proteger y arreglar los sistemas de la organización.\n\n¿Para qué sirve?\nSu objetivo es fortificar las redes (actualizar servidores, instalar firewalls avanzados, monitorizar alertas) y responder con toda su artillería técnica cuando el Red Team (o un hacker real) intenta penetrar en el sistema.\n\nRelación clave:\nRed Team → Rompe. \nBlue Team → Protege y arregla.",
+    "example": "Ejemplo:\nEl Blue Team nota tráfico raro saliendo del ordenador de un empleado en contabilidad. Analizan la situación, descubren que el Red Team había plantado un virus, lo eliminan y bloquean su servidor en 15 minutos. El Blue Team ha ganado la simulación.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "OWASP",
+    "full": "Open Worldwide Application Security Project",
+    "definition": "¿Qué es?\nEs la comunidad y organización abierta más importante y respetada del mundo en el área de seguridad de páginas web y aplicaciones móviles.\n\n¿Para qué sirve?\nSirve como el \"libro de reglas universal\" para los programadores. Especialmente su famoso documento \"OWASP Top 10\", que lista los 10 peores fallos de seguridad web del año (como la inyección SQL) y enseña a los programadores cómo evitarlos al escribir código.",
+    "example": "Ejemplo:\nUn programador termina de hacer la nueva web de su empresa. Antes de publicarla, abre el documento del OWASP Top 10 y repasa si ha cometido alguno de los 10 errores de seguridad web más típicos.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "CVE",
+    "full": "Common Vulnerabilities and Exposures",
+    "definition": "¿Qué es?\nEs el diccionario global o listado mundial que asigna una matrícula (un código oficial) a cada vulnerabilidad informática descubierta en el mundo.\n\n¿Para qué sirve?\nSirve para que todos los informáticos del planeta usen el mismo nombre cuando hablan de un problema concreto, facilitando la búsqueda de su correspondiente parche de seguridad.\n\nSe relaciona con:\nVulnerabilidad descubierta → Se le asigna un número oficial CVE → Se publica el parche.",
+    "example": "Ejemplo:\nUn hacker descubre un fallo en Windows 11. Le comunican el fallo a Microsoft y se registra oficialmente como la vulnerabilidad \"CVE-2023-1045\". Ahora todos los antivirus y técnicos del mundo usarán ese código para referirse al problema.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Bug Bounty",
+    "full": "Programa de recompensa por errores",
+    "definition": "¿Qué es?\nEs un programa donde empresas millonarias (como Google, Apple o Sony) invitan legalmente a los hackers de todo el mundo a intentar romper sus sistemas o buscar vulnerabilidades.\n\n¿Para qué sirve?\nSi el investigador informático (hacker) encuentra un fallo y, en lugar de publicarlo, avisa primero a la empresa siguiendo las reglas, la empresa le recompensa pagándole miles de dólares y reparando el problema en secreto.\n\nSe relaciona con:\nInvestigador ético → Encuentra vulnerabilidad (Bug) → Lo notifica en privado → Recibe recompensa (Bounty).",
+    "example": "Ejemplo:\nUn chico de 18 años descubre cómo saltarse la pantalla de bloqueo del iPhone. Lo envía al programa de Bug Bounty de Apple, la compañía lo comprueba, lanza una actualización rápida para todo el mundo y le transfiere 20.000$ al chico.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Certificaciones Introductorias",
+    "full": "Primeros pasos en Ciberseguridad",
+    "definition": "¿Qué es?\nSon cursos de prestigio internacional que te permiten demostrar que tienes una base sólida para iniciar tu carrera profesional sin necesitar ir obligatoriamente a la universidad.\n\n¿Para qué sirven?\nLas empresas miran estos certificados en el currículum de los aspirantes Junior para saber que entienden el lenguaje técnico básico.\n\nCursos mencionados en el temario:\n- Cisco Introduction to Cybersecurity.\n- Google Cybersecurity Professional Certificate (muy enfocado al rol defensivo y SOC).\n- TryHackMe Pre Security & Jr Penetration Tester (laboratorios muy prácticos y divertidos).",
+    "example": "Ejemplo:\nUn estudiante sin experiencia previa termina el certificado de Google en Coursera y las rutas prácticas básicas de TryHackMe. Ahora tiene los conocimientos y el vocabulario suficientes para presentarse a una entrevista de \"SOC Analyst Nivel 1\".",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Certificaciones Fundamentales y Avanzadas",
+    "full": "Security+, CCNA, OSCP",
+    "definition": "¿Qué es?\nSon los exámenes oficiales más respetados por las empresas de Recursos Humanos del sector TI para demostrar conocimientos avanzados.\n\nRuta estándar:\n1. ISC2 CC: Certificado gratuito de nivel de entrada.\n2. CompTIA Network+: Para demostrar que dominas cómo viajan los datos (TCP, UDP, DNS, IPs).\n3. CompTIA Security+ (SY0-701): Es el certificado más pedido mundialmente para el primer trabajo en ciberseguridad.\n4. CCNA (Cisco): El estándar de oro mundial para ingenieros de redes complejas.\n5. OSCP: El examen más respetado para Pentesters (dura 24 horas seguidas de hackeo práctico intenso en máquinas reales).",
+    "example": "Ejemplo:\nTras sacarse la Security+ de CompTIA (conocimientos básicos defensivos), el alumno decide que le gusta atacar. Estudia intensamente durante un año, aprueba el duro examen práctico de OSCP y consigue trabajo como Pentester Senior.",
+    "module": "Bloque 7 · Profesión"
+  }
+);
+const QUESTION_BANK = [];
+
+/* BLOQUE 1 · Hardware y Sistemas (Secciones 1 y 2) */
+QUESTION_BANK.push(
+  {"q": "¿Qué es la CPU?", "a": "Unidad que ejecuta instrucciones y cálculos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un núcleo?", "a": "Unidad de ejecución dentro de un procesador.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué hace Hyper-Threading/SMT?", "a": "Permite que un núcleo gestione varios hilos lógicos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es la RAM?", "a": "Memoria temporal donde se guardan datos en uso.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué hace el controlador de memoria?", "a": "Gestiona la comunicación entre CPU y RAM.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué son las cachés L1, L2 y L3?", "a": "Memorias rápidas cercanas a la CPU; L1 es la más cercana.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es una GPU integrada?", "a": "Gráficos integrados en el procesador o SoC.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es una NPU?", "a": "Unidad especializada en tareas de inteligencia artificial.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué hacen los controladores de E/S?", "a": "Gestionan comunicaciones con dispositivos de entrada/salida.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué hace un motor de vídeo?", "a": "Codifica y decodifica vídeo.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es el overclocking?", "a": "Hacer funcionar un componente por encima de su configuración de fábrica.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un SoC?", "a": "Chip que integra varios componentes, como CPU, GPU y NPU.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es TPM?", "a": "Módulo que ayuda a proteger y gestionar claves criptográficas.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es BIOS/UEFI?", "a": "Firmware que inicia y configura el equipo antes del sistema operativo.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es Secure Boot?", "a": "Mecanismo que verifica software autorizado durante el arranque.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué son AMD SEV e Intel SGX?", "a": "Tecnologías para aislar o proteger datos/procesos en hardware.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué son Intel ME y AMD PSP?", "a": "Componentes de gestión y seguridad de determinadas plataformas.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un kill switch remoto?", "a": "Función que permite bloquear o borrar remotamente un equipo administrado.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es MBR?", "a": "Esquema antiguo de particionado de discos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es GPT?", "a": "Esquema moderno de particionado de discos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es una partición?", "a": "División lógica de un disco.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Para qué sirve una partición de recuperación?", "a": "Para ayudar a restaurar el sistema.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es una clave OEM?", "a": "Licencia asociada de fábrica al equipo, normalmente vinculada al firmware.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es FAT32?", "a": "Sistema de archivos muy compatible, con límites de tamaño.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es NTFS?", "a": "Sistema de archivos habitual de Windows.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es ext4?", "a": "Sistema de archivos muy usado en Linux.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es RAID?", "a": "Combina discos para mejorar disponibilidad, rendimiento o tolerancia a fallos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es TIER I?", "a": "Nivel básico de infraestructura de CPD, con poca redundancia.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué añade TIER II?", "a": "Componentes redundantes.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué caracteriza TIER III?", "a": "Permite mantenimiento sin detener necesariamente el servicio.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué caracteriza TIER IV?", "a": "Infraestructura tolerante a fallos mediante sistemas independientes.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué significa CIA?", "a": "Confidencialidad, Integridad y Disponibilidad.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es confidencialidad?", "a": "Que solo accedan las personas autorizadas.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es integridad?", "a": "Que los datos no sean alterados incorrectamente.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es disponibilidad?", "a": "Que la información esté accesible cuando se necesita.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un backup completo?", "a": "Copia todos los datos seleccionados.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un backup diferencial?", "a": "Copia cambios desde el último backup completo.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un backup incremental?", "a": "Copia cambios desde el último backup realizado.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Para qué sirve Cobian Backup?", "a": "Para realizar copias de seguridad.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué hace AES-256?", "a": "Cifra información usando una clave.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué diferencia hay entre cifrado y hash?", "a": "El cifrado protege contenido; el hash genera una huella para comprobar cambios.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es BitLocker?", "a": "Cifrado de unidades de Windows.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es SHA-256?", "a": "Función hash que produce una huella digital de datos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es wiping?", "a": "Sobrescritura/eliminación segura de datos según un método definido.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es degaussing?", "a": "Desmagnetización de soportes magnéticos.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué es un Cold Boot Attack?", "a": "Intento de recuperar restos temporales de información de la RAM.", "module": "Bloque 1 · Hardware y Sistemas"},
+  {"q": "¿Qué son estándares de borrado seguro?", "a": "Métodos o referencias para eliminar datos de forma controlada.", "module": "Bloque 1 · Hardware y Sistemas"}
+);
+
+/* BLOQUE 2 · Redes y Protocolos (Secciones 3, 4 y 5) */
+QUESTION_BANK.push(
+  {"q": "¿Qué representa el sistema binario?", "a": "Números usando 0 y 1.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Para qué sirve hexadecimal?", "a": "Para representar valores binarios de forma más compacta.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es decimal?", "a": "Sistema numérico de base 10.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es octal?", "a": "Sistema numérico de base 8.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es ponderación posicional?", "a": "Valor que tiene cada posición según la base y su potencia.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Cuántas capas tiene OSI?", "a": "Siete.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es el modelo OSI?", "a": "Modelo que divide la comunicación de red en siete capas.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es TCP/IP?", "a": "Modelo práctico que organiza las funciones de las redes de Internet.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es una dirección IP?", "a": "Identificador lógico de un dispositivo en una red.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es una máscara de subred?", "a": "Indica qué parte de una IP corresponde a red y qué parte a host.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es el gateway?", "a": "Dispositivo o dirección usada para salir de la red local.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es una MAC?", "a": "Identificador asociado a una interfaz de red.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es OUI?", "a": "Parte de una MAC asociada al fabricante según la asignación correspondiente.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es TCP?", "a": "Protocolo orientado a conexión y diseñado para comunicación fiable.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa SYN?", "a": "Bandera usada para iniciar una conexión TCP.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa ACK?", "a": "Confirmación de recepción en TCP.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa FIN?", "a": "Indica finalización de una conexión TCP.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa RST?", "a": "Indica reinicio o rechazo de una conexión.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa PSH?", "a": "Indica que los datos deben entregarse rápidamente a la aplicación.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa URG?", "a": "Marca información urgente en TCP.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es el Three-Way Handshake?", "a": "SYN → SYN-ACK → ACK.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es UDP?", "a": "Protocolo de transporte sin conexión y sin garantía de entrega/orden.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿TCP o UDP ofrece más control de entrega?", "a": "TCP.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué hace DHCP?", "a": "Asigna automáticamente parámetros de red.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué significa DORA en DHCP?", "a": "Discover → Offer → Request → ACK.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué hace DHCP Discover?", "a": "Busca un servidor DHCP.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué hace DHCP Offer?", "a": "Ofrece una configuración de red.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué hace DHCP Request?", "a": "Solicita una configuración ofrecida.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué hace DHCP ACK?", "a": "Confirma la configuración.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es DHCP Release?", "a": "Liberación de la configuración asignada.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es DHCP NAK?", "a": "Respuesta que indica que la solicitud no puede aceptarse.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué hace DNS?", "a": "Relaciona nombres de dominio con información de red.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Cuál es el puerto habitual de DNS?", "a": "53.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué es un puerto de red?", "a": "Identificador lógico asociado a un servicio de transporte.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué organismo mantiene la asignación oficial de puertos?", "a": "IANA.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa FTP?", "a": "21.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa SSH?", "a": "22.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa Telnet?", "a": "23.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto se asocia a SMTP?", "a": "25.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa DNS?", "a": "53.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa HTTP?", "a": "80.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa HTTPS?", "a": "443.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa SMB?", "a": "445.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Qué puerto usa RDP?", "a": "3389.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Para qué sirve SSH?", "a": "Administración remota segura.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Para qué sirve HTTPS?", "a": "Comunicación web protegida mediante TLS.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Para qué sirve SMB?", "a": "Compartir recursos en redes, especialmente entornos Windows.", "module": "Bloque 2 · Redes y Protocolos"},
+  {"q": "¿Para qué sirve RDP?", "a": "Acceso a escritorio remoto de Windows.", "module": "Bloque 2 · Redes y Protocolos"}
+);
+
+/* BLOQUE 3 · Seguridad e Identidad (Secciones 6, 7 y 17) */
+QUESTION_BANK.push(
+  {"q": "¿Qué hace un firewall?", "a": "Controla comunicaciones según reglas.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué diferencia hay entre firewall de red y de host?", "a": "Uno protege una red/perímetro; el otro protege un equipo.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es una VLAN?", "a": "Separación lógica de dispositivos dentro de una red.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Para qué sirve una red de invitados?", "a": "Separar usuarios externos de sistemas internos.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es una DMZ?", "a": "Zona separada para determinados servicios expuestos o intermediarios.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es una VPN?", "a": "Conexión protegida entre puntos a través de una red.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es una máquina virtual?", "a": "Sistema que se ejecuta dentro de otro sistema mediante virtualización.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué representa VM → VPN → Tor?", "a": "Cadena conceptual de aislamiento/privacidad.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué hace Tor conceptualmente?", "a": "Transporta tráfico mediante varios nodos.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es identificación?", "a": "Indicar quién eres.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es autenticación?", "a": "Demostrar que eres quien dices ser.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es MFA?", "a": "Autenticación usando dos o más factores.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Cuáles son los tres factores básicos de MFA?", "a": "Algo que sabes, tienes o eres.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es IAM?", "a": "Gestión de identidades y accesos.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es RBAC?", "a": "Control de acceso basado en roles.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es Active Directory?", "a": "Sistema para gestionar identidades, equipos y políticas en entornos Windows.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es una GPO?", "a": "Política que permite aplicar configuraciones a usuarios o equipos.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué protege el cifrado?", "a": "La confidencialidad del contenido.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué produce un hash?", "a": "Una huella digital de los datos.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué diferencia básica hay entre clave pública y privada?", "a": "Son un par de claves con funciones complementarias en criptografía asimétrica.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué es criptografía asimétrica?", "a": "Criptografía que usa una clave pública y otra privada.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Para qué sirve TLS?", "a": "Para proteger comunicaciones de red.", "module": "Bloque 3 · Seguridad e Identidad"},
+  {"q": "¿Qué relación hay entre HTTPS y TLS?", "a": "HTTPS usa TLS para proteger la comunicación web.", "module": "Bloque 3 · Seguridad e Identidad"}
+);
+
+/* BLOQUE 4 · Auditoría y Herramientas (Secciones 8, 10 y 11) */
+QUESTION_BANK.push(
+  {"q": "¿Para qué sirve Nmap?", "a": "Descubrir hosts, puertos y servicios en redes autorizadas.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace Nmap -sS?", "a": "Realiza un escaneo TCP SYN.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace Nmap -sU?", "a": "Escanea puertos UDP.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué controlan -T0 a -T5?", "a": "La temporización/agresividad del escaneo.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -T4?", "a": "Usa una temporización rápida.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -A?", "a": "Activa varias técnicas de detección.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -sV?", "a": "Intenta identificar versiones de servicios.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -O?", "a": "Intenta identificar el sistema operativo.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -v?", "a": "Aumenta el detalle mostrado.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -p?", "a": "Permite especificar puertos.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace -sn?", "a": "Realiza descubrimiento de hosts sin un escaneo normal de puertos.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es NSE?", "a": "Motor de scripts de Nmap.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es scope?", "a": "Conjunto de sistemas y acciones autorizados en una auditoría.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es Zenmap?", "a": "Interfaz gráfica relacionada con Nmap.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Para qué sirve Wireshark?", "a": "Capturar y analizar paquetes de red.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué filtros básicos se practican en Wireshark?", "a": "DHCP, DNS y HTTP, entre otros.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Para qué sirve ping?", "a": "Comprobar conectividad.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué hace ping -t?", "a": "Mantiene comprobaciones continuas en sistemas donde la opción está disponible.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es un Rogue AP?", "a": "Punto de acceso Wi-Fi no autorizado.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es un honeypot?", "a": "Sistema preparado para atraer o detectar determinada actividad.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Para qué sirve Burp Suite Professional?", "a": "Analizar aplicaciones web y sus comunicaciones.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Para qué sirve BloodHound?", "a": "Visualizar relaciones y permisos en Active Directory.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es Impacket?", "a": "Conjunto de herramientas/librerías para trabajar con protocolos de redes Windows.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Para qué se usa NetExec/CrackMapExec?", "a": "Evaluación y administración/auditoría de redes Windows y Active Directory.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es Sliver C2?", "a": "Framework de Command and Control para ejercicios y simulaciones autorizadas.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es Kali Linux?", "a": "Distribución Linux orientada a formación y auditoría de seguridad.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Para qué se usa Windows Server en el laboratorio?", "a": "Practicar servicios y tecnologías de servidor Windows.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es Packet Tracer?", "a": "Simulador de redes de Cisco.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué se puede practicar en Packet Tracer?", "a": "Routers, switches, DHCP, DNS, VLAN, routing e IoT.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué es NetAcad?", "a": "Plataforma educativa de Cisco Networking Academy.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Qué son Professional Skills?", "a": "Habilidades de comunicación, trabajo en equipo, troubleshooting, ética y documentación, entre otras.", "module": "Bloque 4 · Auditoría y Herramientas"},
+  {"q": "¿Por qué es importante la ética en ciberseguridad?", "a": "Porque las pruebas deben realizarse con autorización y dentro del alcance definido.", "module": "Bloque 4 · Auditoría y Herramientas"}
+);
+
+/* BLOQUE 5 · Riesgos y Ataques (Secciones 9 y 13) */
+QUESTION_BANK.push(
+  {"q": "¿Qué es un activo?", "a": "Algo que tiene valor y debe protegerse.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es una amenaza?", "a": "Algo que puede causar daño.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es una vulnerabilidad?", "a": "Debilidad que puede ser aprovechada.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es riesgo?", "a": "Posibilidad de que una amenaza explote una vulnerabilidad y cause impacto.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Cómo se expresa el riesgo en los apuntes?", "a": "Probabilidad × Impacto.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es un incidente de seguridad?", "a": "Suceso real que afecta a la seguridad.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es una contramedida?", "a": "Medida que reduce o controla un riesgo.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es un control preventivo?", "a": "Medida que intenta evitar un problema.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es un control reactivo/de continuidad?", "a": "Medida para responder y recuperarse de un problema.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es un buffer overflow?", "a": "Una vulnerabilidad que puede sobrescribir memoria fuera del búfer previsto.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es un rootkit/bootkit?", "a": "Malware que busca ocultarse y operar a bajo nivel o durante el arranque.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es escalada de privilegios?", "a": "Pasar de permisos limitados a permisos superiores.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es ransomware?", "a": "Malware que puede cifrar datos y exigir un rescate.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es phishing?", "a": "Engaño dirigido a personas para obtener información o provocar acciones.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es DHCP Rogue?", "a": "Servidor DHCP no autorizado.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es DHCP Spoofing?", "a": "Envío de respuestas DHCP falsas.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es MitM?", "a": "Situación en la que un tercero se coloca entre dos partes de una comunicación.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es DNS Spoofing/Redirection?", "a": "Manipular la resolución para dirigir a una dirección incorrecta.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es SQL Injection?", "a": "Vulnerabilidad causada por entradas que alteran consultas SQL de una aplicación.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es verbose error handling?", "a": "Mostrar errores con demasiada información interna.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es IoT?", "a": "Dispositivos conectados como cámaras, sensores o electrodomésticos.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es firmware?", "a": "Software interno de un dispositivo.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es un riesgo de cadena de suministro?", "a": "Riesgo introducido mediante proveedores, software o componentes externos.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Para qué sirve separar IoT en una VLAN?", "a": "Reducir su acceso directo a sistemas principales.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué es MAGERIT?", "a": "Metodología de análisis y gestión de riesgos mencionada en los materiales.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Cuántos libros se mencionan en MAGERIT v3?", "a": "Tres: Método, Catálogo de Elementos y Guía de Técnicas.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué representan las capas de activos indicadas en T1-7?", "a": "Funciones/procesos, información/datos, sistema de información y entorno.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Cuáles son cuatro tratamientos del riesgo?", "a": "Evitar, mitigar, transferir y aceptar.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué significa evitar un riesgo?", "a": "Eliminar la actividad o situación que lo genera.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué significa mitigar un riesgo?", "a": "Reducirlo mediante controles.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué significa transferir un riesgo?", "a": "Trasladar parte del riesgo a otra parte.", "module": "Bloque 5 · Riesgos y Ataques"},
+  {"q": "¿Qué significa aceptar un riesgo?", "a": "Decidir asumir el riesgo restante.", "module": "Bloque 5 · Riesgos y Ataques"}
+);
+
+/* BLOQUE 6 · Continuidad y Normativa (Secciones 12, 14, 15 y 16) */
+QUESTION_BANK.push(
+  {"q": "¿Qué es BIA?", "a": "Análisis del impacto que tendría la interrupción de procesos importantes.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es DRP?", "a": "Plan para recuperar sistemas después de un desastre.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es SLA?", "a": "Acuerdo que define niveles de servicio esperados.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es RTO?", "a": "Tiempo objetivo para recuperar un servicio.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es RPO?", "a": "Pérdida de datos temporal máxima que se pretende tolerar.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Cómo se recoge información para un BIA?", "a": "Mediante formularios, entrevistas, personal TIC, usuarios y análisis de procesos.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es un SGSI?", "a": "Sistema organizado para gestionar la seguridad de la información.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué significa PDCA?", "a": "Plan → Do → Check → Act.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué significa Plan?", "a": "Planificar objetivos y controles.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué significa Do?", "a": "Aplicar lo planificado.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué significa Check?", "a": "Comprobar resultados.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué significa Act?", "a": "Corregir y mejorar.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es un GAP de seguridad?", "a": "Diferencia entre el estado actual y el estado objetivo.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es un plan de seguridad?", "a": "Documento que organiza riesgos, controles, responsables y medidas.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es SoA?", "a": "Statement of Applicability: documento que indica controles aplicables y su justificación.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es el RGPD?", "a": "Reglamento europeo sobre protección de datos personales.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es LOPDGDD?", "a": "Ley española que complementa el marco de protección de datos y derechos digitales.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es la AEPD?", "a": "Agencia Española de Protección de Datos.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es el Documento de Seguridad en los materiales?", "a": "Documento relacionado con medidas de seguridad para información personal.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es un CPD?", "a": "Centro de Procesamiento de Datos.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es un perímetro de seguridad?", "a": "Límite que controla el acceso físico a zonas protegidas.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Por qué controlar temperatura y humedad?", "a": "Para mantener condiciones adecuadas para los equipos.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es un UPS/SAI?", "a": "Sistema que mantiene temporalmente la alimentación ante un corte.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Para qué sirven los generadores?", "a": "Para mantener suministro durante interrupciones prolongadas.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es redundancia eléctrica?", "a": "Disponer de rutas o componentes alternativos de alimentación.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es TIA-942?", "a": "Referencia relacionada con infraestructura de centros de datos.", "module": "Bloque 6 · Continuidad y Normativa"},
+  {"q": "¿Qué es NFPA?", "a": "Familia de normas y referencias relacionadas, entre otros temas, con protección contra incendios.", "module": "Bloque 6 · Continuidad y Normativa"}
+);
+
+/* BLOQUE 7 · Profesión (Secciones 18, 19, 20 y 21) */
+QUESTION_BANK.push(
+  {"q": "¿Qué hace un SOC Analyst?", "a": "Analiza alertas y eventos de seguridad.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué hace un pentester?", "a": "Busca vulnerabilidades mediante pruebas autorizadas.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué hace un Red Team?", "a": "Simula ataques autorizados para evaluar defensas.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué hace un Blue Team?", "a": "Defiende, detecta y responde ante ataques.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cómo se relacionan Red Team y Blue Team?", "a": "Red Team simula ataques; Blue Team trabaja en la defensa.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es OWASP?", "a": "Referencia/proyecto muy utilizado para seguridad de aplicaciones web.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es CVE?", "a": "Identificador de vulnerabilidades conocidas.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es Bug Bounty?", "a": "Programa que permite reportar vulnerabilidades siguiendo reglas de una organización.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es Cisco Networking Academy Introduction to Cybersecurity?", "a": "Curso introductorio de Cisco sobre ciberseguridad.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es Google Cybersecurity Professional Certificate?", "a": "Programa formativo introductorio/profesional de ciberseguridad.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es TryHackMe Pre Security?", "a": "Ruta práctica introductoria de fundamentos.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es TryHackMe Jr Penetration Tester?", "a": "Ruta práctica introductoria de pentesting.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es Fortinet FCF?", "a": "Formación/certificación inicial de Fortinet.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es ISC2 CC?", "a": "Certificación de entrada Certified in Cybersecurity.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es CompTIA Network+?", "a": "Certificación centrada en fundamentos de redes.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es Security+?", "a": "Certificación de fundamentos de ciberseguridad de CompTIA.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es CCNA?", "a": "Certificación de Cisco relacionada con redes.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es C|CSE?", "a": "Certificación especializada en seguridad cloud.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es OSCP?", "a": "Certificación práctica de seguridad ofensiva.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Qué es CySA+?", "a": "Certificación orientada al análisis de seguridad.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cuál es la ruta general de aprendizaje propuesta?", "a": "Fundamentos → Redes → Seguridad → Práctica → Certificación → Especialización.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cuál es la cadena básica desde hardware hasta Internet?", "a": "Hardware → sistema → red → IP → DHCP/DNS → TCP/UDP → puertos → servicios → Internet.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cuál es la cadena básica de auditoría?", "a": "Red → Nmap/Wireshark → observación → vulnerabilidades → análisis → informe.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cuál es la cadena de un riesgo?", "a": "Activo → amenaza → vulnerabilidad → probabilidad/impacto → riesgo → control → revisión.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cuál es la cadena de continuidad?", "a": "Proceso → BIA → impacto → RTO/RPO → backup/DRP → recuperación.", "module": "Bloque 7 · Profesión"},
+  {"q": "¿Cuál es la cadena del SGSI?", "a": "Plan → Do → Check → Act → mejora continua.", "module": "Bloque 7 · Profesión"}
+);
+/* ============ STATE ============ */
+let entries = [];
+let currentTab = 'glosario';
+let selectedModules = new Set();
+let searchQuery = '';
+let openTermId = null;
+
+let fcOrder = [];
+let fcIndex = 0;
+let fcFlipped = false;
+
+let quizQuestions = [];
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+let quizFinished = false;
+
+let aiPreview = null;
+let customEntries = [];
+
+/* ============ STORAGE ============ */
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem('uplink-custom-entries');
+    customEntries = raw ? JSON.parse(raw) : [];
+    if(!Array.isArray(customEntries)) customEntries = [];
+  }catch(e){
+    customEntries = [];
+  }
+  entries = [
+    ...SEED_DATA.map(e=>({...e, id: 'seed-'+cryptoId()})),
+    ...customEntries
+  ];
+}
+function persistCustom(){
+  try{
+    localStorage.setItem('uplink-custom-entries', JSON.stringify(customEntries));
+  }catch(e){ console.error('storage error', e); }
+}
+function cryptoId(){
+  return (crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Math.random().toString(36).slice(2);
+}
+
+/* ============ RENDER: MAIN ROUTER ============ */
+function render(){
+  document.querySelectorAll('.navbtn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-tab')===currentTab);
+  });
+  const chipsWrap = document.getElementById('moduleChips');
+  const hint = document.getElementById('moduleHint');
+  if(currentTab==='add'){
+    chipsWrap.style.display = 'none';
+    hint.style.display = 'none';
+  } else {
+    chipsWrap.style.display = '';
+    hint.style.display = '';
+    renderChips();
+  }
+  const main = document.getElementById('main');
+  if(currentTab==='glosario') main.innerHTML = renderGlosarioHtml();
+  else if(currentTab==='cards') main.innerHTML = renderCardsHtml();
+  else if(currentTab==='quiz') main.innerHTML = renderQuizHtml();
+  else main.innerHTML = renderAddHtml();
+  attachTabHandlers();
+}
+
+/* ============ GLOSARIO ============ */
+function renderGlosarioHtml(){
+  const list = filteredEntries().filter(e=>{
+    if(!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (e.term+' '+(e.full||'')+' '+e.definition).toLowerCase().includes(q);
+  });
+  if(list.length===0){
+    return `<input class="search" id="searchInput" placeholder="Buscar término, sigla o concepto..." value="${escapeAttr(searchQuery)}">
+      <div class="empty">No hay conceptos que coincidan.<br>Añade apuntes nuevos desde la pestaña "Añadir".</div>`;
+  }
+  const groups = {};
+  list.forEach(e=>{ (groups[e.module] = groups[e.module]||[]).push(e); });
+
+  let html = `<input class="search" id="searchInput" placeholder="Buscar término, sigla o concepto..." value="${escapeAttr(searchQuery)}">`;
+  Object.keys(groups).forEach(mod=>{
+    html += `<div class="module-group"><div class="module-title">${escapeHtml(mod)}</div>`;
+    groups[mod].forEach(e=>{
+      const open = openTermId===e.id;
+      html += `
+        <div class="term-row">
+          <div class="term-head" data-toggle="${e.id}">
+            <div>
+              <div class="term-name">${escapeHtml(e.term)}</div>
+              ${e.full ? `<div class="term-full">${escapeHtml(e.full)}</div>` : ''}
+            </div>
+          </div>
+          <div class="term-body ${open?'open':''}">
+            <div class="term-def">${escapeHtml(e.definition)}</div>
+            ${e.example ? `<div class="term-ex">${escapeHtml(e.example)}</div>` : ''}
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+  return html;
+}
+
+/* ============ FLASHCARDS ============ */
+function startFlashcards(){
+  fcOrder = shuffle(filteredEntries());
+  fcIndex = 0;
+  fcFlipped = false;
+}
+function renderCardsHtml(){
+  if(fcOrder.length===0 || !fcOrder.some(e=>filteredEntries().includes(e))) startFlashcards();
+  if(fcOrder.length===0){
+    return `<div class="empty">No hay tarjetas en este bloque todavía.</div>`;
+  }
+  const e = fcOrder[fcIndex];
+  return `
+    <div class="fc-wrap">
+      <div class="fc-progress">${fcIndex+1} / ${fcOrder.length} · ${escapeHtml(e.module.split('·')[0].trim())}</div>
+      <div class="fc-card ${fcFlipped?'flipped':''}" id="fcCard">
+        <div class="fc-inner">
+          <div class="fc-face front">
+            <div class="fc-tag">Término</div>
+            <div class="fc-term">${escapeHtml(e.term)}</div>
+            ${e.full ? `<div class="fc-full">${escapeHtml(e.full)}</div>` : ''}
+            <div class="fc-hint">Toca la tarjeta para ver la definición</div>
+          </div>
+          <div class="fc-face back">
+            <div class="fc-tag">Definición</div>
+            <div class="fc-def">${escapeHtml(e.definition)}</div>
+            ${e.example ? `<div class="fc-ex">${escapeHtml(e.example)}</div>` : ''}
+          </div>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="btn ghost" id="fcPrev">← Anterior</button>
+        <button class="btn primary" id="fcNext">Siguiente →</button>
+      </div>
+    </div>`;
+}
+
+/* ============ QUIZ ============ */
+function buildQuiz(){
+  const pool = filteredEntries();
+  const fixedPool = QUESTION_BANK.filter(q => selectedModules.size === 0 || selectedModules.has(q.module));
+
+  // 1. Generar preguntas automáticas desde las tarjetas
+  const autoQuestions = pool.map(correct => {
+    const others = pool.filter(e => e.id !== correct.id);
+    const distractors = shuffle(others).slice(0, 3).map(o => o.definition);
+    const askTermToDef = Math.random() > 0.4 || pool.length < 4;
+    let prompt, correctOption, options;
+    
+    if(askTermToDef){
+      prompt = `¿Cuál es la definición de <span class="mono">${escapeHtml(correct.term)}</span>?`;
+      correctOption = correct.definition;
+      options = shuffle([correctOption, ...distractors]);
+    } else {
+      prompt = `¿A qué término corresponde esta definición?\n\n"${escapeHtml(correct.definition)}"`;
+      correctOption = correct.term;
+      const termDistractors = shuffle(others).slice(0, 3).map(o => o.term);
+      options = shuffle([correct.term, ...termDistractors]);
+    }
+    return { prompt, options, correctOption };
+  });
+
+  // 2. Generar preguntas desde el banco fijo
+  const fixedQuestions = fixedPool.map(fq => {
+    const otherFixed = fixedPool.filter(o => o.q !== fq.q);
+    const distractors = shuffle(otherFixed).slice(0, 3).map(o => o.a);
+    
+    while(distractors.length < 3) {
+      const fallback = shuffle(pool)[0];
+      if (fallback) distractors.push(fallback.definition);
+      else distractors.push("Opción incorrecta autogenerada");
+    }
+    
+    return {
+      prompt: fq.q,
+      correctOption: fq.a,
+      options: shuffle([fq.a, ...distractors.slice(0, 3)])
+    };
+  });
+
+  // 3. Combinar y seleccionar aleatoriamente 10 preguntas
+  const combined = shuffle([...autoQuestions, ...fixedQuestions]);
+  const n = Math.min(combined.length, 10);
+  quizQuestions = combined.slice(0, n);
+
+  quizIndex = 0; quizScore = 0; quizAnswered = false; quizFinished = false;
+}
+
+function renderQuizHtml(){
+  if(quizQuestions.length===0 && filteredEntries().length < 2 && QUESTION_BANK.length === 0){
+    return `<div class="empty">Necesitas al menos 2 conceptos en este bloque para hacer un quiz.</div>`;
+  }
+  if(quizQuestions.length===0) buildQuiz();
+  if(quizFinished){
+    return `
+      <div class="quiz-result">
+        <div class="fc-tag">Resultado</div>
+        <div class="score">${quizScore}/${quizQuestions.length}</div>
+        <p style="color:var(--muted);margin-top:6px;">${quizFeedback(quizScore, quizQuestions.length)}</p>
+        <button class="btn primary" id="quizRestart" style="max-width:220px;margin:20px auto 0;">Repetir quiz</button>
+      </div>`;
+  }
+  const q = quizQuestions[quizIndex];
+  const optsHtml = q.options.map(opt=>{
+    let cls = '';
+    if(quizAnswered){
+      if(opt===q.correctOption) cls = 'correct';
+      else if(opt===q.selected) cls = 'wrong';
+    }
+    return `<button class="qopt ${cls}" data-opt="${escapeAttr(opt)}" ${quizAnswered?'disabled':''}>${escapeHtml(opt)}</button>`;
+  }).join('');
+  return `
+    <div class="quiz-top"><span>Pregunta ${quizIndex+1}/${quizQuestions.length}</span><span>Aciertos: ${quizScore}</span></div>
+    <div class="quiz-q">${q.prompt}</div>
+    <div id="quizOpts">${optsHtml}</div>
+    ${quizAnswered ? `<button class="btn primary" id="quizNext" style="margin-top:10px;">${quizIndex+1<quizQuestions.length?'Siguiente':'Ver resultado'}</button>` : ''}
+  `;
+}
+function quizFeedback(score,total){
+  const pct = score/total;
+  if(pct===1) return "Perfecto. Dominas estos conceptos.";
+  if(pct>=0.7) return "Muy bien. Repasa los que has fallado.";
+  if(pct>=0.4) return "Vas por buen camino, repite el bloque.";
+  return "Repasa el glosario y vuelve a intentarlo.";
+}
+
+/* ============ ADD CONTENT ============ */
+let showManualForm = false;
+function renderAddHtml(){
+  const seedCount = SEED_DATA.length;
+  const customCount = customEntries.length;
+  const contextPrompt = buildContextPrompt();
+  let html = `
+    <div class="section-label">Añadir una tarjeta</div>
+    <button class="btn primary" id="toggleManual" style="width:100%;">${showManualForm ? '– Ocultar formulario' : '+ Añadir tarjeta manual'}</button>
+    <div id="manualFormWrap"></div>
+
+    <hr class="sep">
+
+    <div class="section-label">Añadir varias tarjetas con ayuda de una IA</div>
+    <p style="color:var(--muted);font-size:13px;margin-top:-4px;">1. Copia este prompt y pégalo al empezar una conversación nueva en Claude, ChatGPT o la IA que uses. Esa IA te pedirá tus apuntes o el PDF de clase y te devolverá el resultado ya listo para pegar aquí.</p>
+    <div class="field">
+      <textarea id="contextPromptOutput" rows="7" readonly>${escapeHtml(contextPrompt)}</textarea>
+    </div>
+    <button class="btn ghost" id="copyContextBtn" style="width:100%;">Copiar prompt</button>
+
+    <p style="color:var(--muted);font-size:13px;margin-top:16px;">2. Cuando esa IA te devuelva el resultado, pégalo aquí y pulsa importar.</p>
+    <div class="field">
+      <textarea id="jsonInput" rows="6" placeholder="Pega aquí la respuesta que te dio la IA..."></textarea>
+    </div>
+    <button class="btn primary" id="importJsonBtn" style="width:100%;">Importar tarjetas</button>
+    <div id="aiStatus"></div>
+    <div id="aiPreviewWrap"></div>
+
+    <hr class="sep">
+    <div class="section-label">Datos guardados</div>
+    <p style="color:var(--muted);font-size:13px;">${seedCount} tarjetas vienen del código (se actualizan solas al editar el archivo) y ${customCount} las has añadido tú desde este navegador (se guardan solo en este dispositivo).</p>
+    <button class="btn danger-outline" id="resetBtn" style="width:100%;margin-top:6px;">Borrar solo lo que he añadido yo</button>
+  `;
+  return html;
+}
+function buildContextPrompt(){
+  return `Eres un asistente educativo de redes y ciberseguridad.
+
+El contenido está destinado a un estudiante de aproximadamente 12-13 años.
+
+Para cada concepto:
+1. Explica qué es con lenguaje sencillo.
+2. Explica para qué sirve.
+3. Proporciona un ejemplo concreto.
+4. Si existe un procedimiento, muéstralo paso a paso.
+5. Explica relaciones importantes con otros conceptos.
+6. Si existen conceptos fácilmente confundibles, aclara la diferencia.
+7. No uses marcadores [cite].
+8. No inventes información que no esté respaldada por el contexto proporcionado.
+9. Mantén todos los conceptos importantes del texto.
+10. Devuelve únicamente JSON válido.
+
+Bloques disponibles:
+${MODULES.map(m=>'- '+m).join('\n')}
+
+Responde ÚNICAMENTE con un array JSON válido, sin texto antes ni después, con este formato exacto:
+[{"term":"Término","full":"Significado completo (o vacío)","definition":"Explicación completa con las reglas aplicadas","example":"Ejemplo realista","module":"Nombre exacto del bloque"}]`;
+}
+function renderManualForm(){
+  const wrap = document.getElementById('manualFormWrap');
+  if(!showManualForm){ wrap.innerHTML=''; return; }
+  const modOptions = MODULES.map(m=>`<option value="${escapeAttr(m)}">${escapeHtml(m)}</option>`).join('');
+  wrap.innerHTML = `
+    <div class="field"><label>Término / sigla</label><input type="text" id="mTerm" placeholder="ej. VPN"></div>
+    <div class="field"><label>Significado de la sigla (si aplica)</label><input type="text" id="mFull" placeholder="ej. Virtual Private Network"></div>
+    <div class="field"><label>Definición</label><textarea id="mDef" rows="3" placeholder="Explica el concepto con tus palabras"></textarea></div>
+    <div class="field"><label>Ejemplo</label><textarea id="mEx" rows="2" placeholder="Un ejemplo práctico"></textarea></div>
+    <div class="field"><label>Bloque</label><select id="mMod">${modOptions}</select></div>
+    <button class="btn primary" id="mSave" style="width:100%;">Guardar tarjeta</button>
+  `;
+  document.getElementById('mSave').addEventListener('click', ()=>{
+    const term = document.getElementById('mTerm').value.trim();
+    const def = document.getElementById('mDef').value.trim();
+    if(!term || !def){ alert('El término y la definición son obligatorios.'); return; }
+    const newEntry = {
+      id:cryptoId(), term,
+      full: document.getElementById('mFull').value.trim(),
+      definition: def,
+      example: document.getElementById('mEx').value.trim(),
+      module: document.getElementById('mMod').value
+    };
+    customEntries.push(newEntry);
+    persistCustom();
+    entries.push(newEntry);
+    showManualForm = false;
+    render();
+  });
+}
+
+function importJsonResponse(){
+  const statusEl = document.getElementById('aiStatus');
+  const rawJson = document.getElementById('jsonInput').value.trim();
+  
+  if(!rawJson){ statusEl.innerHTML = `<div class="status-msg err">Pega primero la respuesta JSON de la IA.</div>`; return; }
+  
+  try{
+    // Limpieza de marcadores de cita si los hubiera y limpieza de markdown
+    let cleaned = rawJson.replace(/```json|```/g,'').trim();
+    cleaned = cleaned.replace(/\s*\]*\]\s*/gi, " ");
+    
+    let parsed;
+    try{ parsed = JSON.parse(cleaned); }
+    catch(e){
+      const match = cleaned.match(/\[[\s\S]*\]/);
+      if(match) parsed = JSON.parse(match[0]);
+      else throw e;
+    }
+    
+    if(!Array.isArray(parsed) || parsed.length===0){
+      statusEl.innerHTML = `<div class="status-msg err">Ese texto no parece un array JSON válido. Revisa que copiaste toda la respuesta de la IA.</div>`;
+      return;
+    }
+    
+    aiPreview = parsed.map(p=>({
+      id: cryptoId(), include:true,
+      term: p.term||'', full: p.full||'', definition: p.definition||'',
+      example: p.example||'', module: MODULES.includes(p.module) ? p.module : MODULES[0]
+    }));
+    
+    statusEl.innerHTML = `<div class="status-msg">Se importaron ${aiPreview.length} conceptos. Revisa y guarda los que quieras.</div>`;
+    renderAiPreview();
+  }catch(err){
+    console.error(err);
+    statusEl.innerHTML = `<div class="status-msg err">No se pudo leer ese JSON. Revisa que la IA no haya añadido texto extra fuera del array.</div>`;
+  }
+}
+function renderAiPreview(){
+  const previewEl = document.getElementById('aiPreviewWrap');
+  if(!aiPreview){ previewEl.innerHTML=''; return; }
+  const modOptions = (m)=>MODULES.map(x=>`<option value="${escapeAttr(x)}" ${x===m?'selected':''}>${escapeHtml(x)}</option>`).join('');
+  previewEl.innerHTML = aiPreview.map(p=>`
+    <div class="preview-card" data-pid="${p.id}">
+      <div class="ph">
+        <label><input type="checkbox" ${p.include?'checked':''} data-check="${p.id}"> ${escapeHtml(p.term)}</label>
+      </div>
+      <input type="text" data-field="full" data-pid="${p.id}" value="${escapeAttr(p.full)}" placeholder="Significado de la sigla">
+      <textarea data-field="definition" data-pid="${p.id}" rows="2" placeholder="Definición">${escapeHtml(p.definition)}</textarea>
+      <textarea data-field="example" data-pid="${p.id}" rows="2" placeholder="Ejemplo" style="margin-top:6px;">${escapeHtml(p.example)}</textarea>
+      <select data-field="module" data-pid="${p.id}" style="margin-top:6px;">${modOptions(p.module)}</select>
+    </div>
+  `).join('') + `<button class="btn primary" id="confirmSave" style="width:100%;margin-top:6px;">Guardar tarjetas seleccionadas</button>`;
+
+  previewEl.querySelectorAll('[data-check]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const p = aiPreview.find(x=>x.id===cb.getAttribute('data-check'));
+      p.include = cb.checked;
+    });
+  });
+  previewEl.querySelectorAll('[data-field]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const p = aiPreview.find(x=>x.id===inp.getAttribute('data-pid'));
+      p[inp.getAttribute('data-field')] = inp.value;
+    });
+  });
+  document.getElementById('confirmSave').addEventListener('click', ()=>{
+    const toAdd = aiPreview.filter(p=>p.include && p.term.trim() && p.definition.trim())
+      .map(p=>({id:cryptoId(), term:p.term, full:p.full, definition:p.definition, example:p.example, module:p.module}));
+    customEntries.push(...toAdd);
+    persistCustom();
+    entries.push(...toAdd);
+    aiPreview = null;
+    render();
+  });
+}
+
+/* ============ EVENT WIRING ============ */
+function attachTabHandlers(){
+  if(currentTab==='glosario'){
+    const search = document.getElementById('searchInput');
+    if(search) search.addEventListener('input', e=>{ searchQuery = e.target.value; render(); document.getElementById('searchInput').focus(); document.getElementById('searchInput').setSelectionRange(searchQuery.length, searchQuery.length); });
+    document.querySelectorAll('[data-toggle]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const id = el.getAttribute('data-toggle');
+        openTermId = openTermId===id ? null : id;
+        render();
+      });
+    });
+  }
+  if(currentTab==='cards'){
+    const card = document.getElementById('fcCard');
+    if(card) card.addEventListener('click', ()=>{ fcFlipped = !fcFlipped; render(); });
+    const prev = document.getElementById('fcPrev');
+    const next = document.getElementById('fcNext');
+    if(prev) prev.addEventListener('click', ()=>{ fcIndex = (fcIndex-1+fcOrder.length)%fcOrder.length; fcFlipped=false; render(); });
+    if(next) next.addEventListener('click', ()=>{ fcIndex = (fcIndex+1)%fcOrder.length; fcFlipped=false; render(); });
+  }
+  if(currentTab==='quiz'){
+    document.querySelectorAll('.qopt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const q = quizQuestions[quizIndex];
+        q.selected = btn.getAttribute('data-opt');
+        quizAnswered = true;
+        if(q.selected===q.correctOption) quizScore++;
+        render();
+      });
+    });
+    const nextBtn = document.getElementById('quizNext');
+    if(nextBtn) nextBtn.addEventListener('click', ()=>{
+      if(quizIndex+1 < quizQuestions.length){ quizIndex++; quizAnswered=false; }
+      else { quizFinished = true; }
+      render();
+    });
+    const restart = document.getElementById('quizRestart');
+    if(restart) restart.addEventListener('click', ()=>{ buildQuiz(); render(); });
+  }
+  if(currentTab==='add'){
+    document.getElementById('toggleManual').addEventListener('click', ()=>{
+      showManualForm = !showManualForm;
+      render();
+    });
+    if(showManualForm) renderManualForm();
+    document.getElementById('copyContextBtn').addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(buildContextPrompt());
+        const b = document.getElementById('copyContextBtn');
+        b.textContent = 'Copiado ✓';
+        setTimeout(()=>{ const b2=document.getElementById('copyContextBtn'); if(b2) b2.textContent='Copiar prompt'; }, 1800);
+      }catch(e){
+        alert('No se pudo copiar automáticamente. Selecciona el texto de arriba y cópialo manualmente.');
+      }
+    });
+    document.getElementById('importJsonBtn').addEventListener('click', importJsonResponse);
+    if(aiPreview) renderAiPreview();
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(confirm('Esto eliminará solo las tarjetas que has añadido tú manualmente o por IA (las del código se quedan igual). ¿Continuar?')){
+        customEntries = [];
+        persistCustom();
+        loadEntries();
+        render();
+      }
+    });
+  }
+}
+
+document.querySelectorAll('.navbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    currentTab = btn.getAttribute('data-tab');
+    if(currentTab==='cards') startFlashcards();
+    if(currentTab==='quiz'){ quizQuestions=[]; quizFinished=false; }
+    openTermId = null;
+    render();
+  });
+});
+
+/* ============ UTIL ============ */
+function escapeHtml(str){
+  return String(str||'').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+
+/* ============ HELPERS ============ */
+function allModulesUsed(){
+  const set = new Set(entries.map(e=>e.module));
+  return MODULES.filter(m=>set.has(m)).concat([...set].filter(m=>!MODULES.includes(m)));
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function filteredEntries(){
+  if(selectedModules.size===0) return entries;
+  return entries.filter(e=>selectedModules.has(e.module));
+}
+
+/* ============ RENDER: CHIPS ============ */
+function renderChips(){
+  const wrap = document.getElementById('moduleChips');
+  const hint = document.getElementById('moduleHint');
+  const mods = allModulesUsed();
+
+  if(hint){
+    if(currentTab==='glosario'){
+      hint.textContent = 'Toca uno o varios bloques para filtrar (todos = todos marcados)';
+    } else if(currentTab==='cards'){
+      hint.textContent = 'Elige de qué bloques quieres tarjetas — puedes combinar varios';
+    } else if(currentTab==='quiz'){
+      hint.textContent = 'Elige de qué bloques salen las preguntas — puedes combinar varios';
+    } else {
+      hint.textContent = '';
+    }
+  }
+
+  wrap.innerHTML = mods.map(m=>{
+    const label = m.split('·')[0].trim();
+    const active = (selectedModules.size===0 || selectedModules.has(m)) ? 'active' : '';
+    return `<button class="chip ${active}" data-mod="${escapeAttr(m)}">${escapeHtml(label)}</button>`;
+  }).join('');
+
+  wrap.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const m = btn.getAttribute('data-mod');
+      if(selectedModules.size===0){
+        selectedModules = new Set(mods.filter(x=>x!==m));
+      } else if(selectedModules.has(m)){
+        selectedModules.delete(m);
+        if(selectedModules.size===0){
+          mods.forEach(x=>selectedModules.add(x));
+          selectedModules.delete(m);
+        }
+      } else {
+        selectedModules.add(m);
+        if(selectedModules.size===mods.length) selectedModules = new Set();
+      }
+      if(currentTab==='cards') startFlashcards();
+      if(currentTab==='quiz') { quizQuestions=[]; quizFinished=false; }
+      render();
+    });
+  });
+}
+
+/* ============ INIT ============ */
+(function init(){
+  document.getElementById('main').innerHTML = `<div class="empty"><span class="loader"></span>Cargando tus tarjetas...</div>`;
+  loadEntries();
+  render();
+})();
+</script>
+</body>
+</html>
