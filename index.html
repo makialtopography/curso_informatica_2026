@@ -295,6 +295,202 @@ const MODULES = [
 
 const SEED_DATA = [
   {
+    "term": "ICMP (Tipos y Códigos)",
+    "full": "Internet Control Message Protocol",
+    "definition": "Protocolo de Capa 3 para diagnóstico. Mensajes clave: Type 8/Code 0 (Echo Request), Type 0/Code 0 (Echo Reply), Type 3 (Destination Unreachable) y Type 11 (Time Exceeded). Vídeo: https://www.youtube.com/watch?v=zNOFU3pMBm0",
+    "example": "Al hacer 'ping 192.168.1.1', envías un ICMP Type 8 Code 0 y esperas un ICMP Type 0 Code 0.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "ARP vs ICMP",
+    "full": "Address Resolution Protocol vs ICMP",
+    "definition": "ARP opera en Capa 2 asociando IP con dirección física MAC en la red local. ICMP opera en Capa 3 transportando mensajes de control. Vídeo: https://www.youtube.com/watch?v=tEinPrA_orU",
+    "example": "Antes de enviar un ICMP Ping local, el equipo emite una petición ARP Broadcast para descubrir la MAC.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Pathping",
+    "full": "Herramienta de diagnóstico",
+    "definition": "Combina el trazado de ruta de 'tracert' con pings masivos (100 por salto) para medir latencia y % de pérdida de paquetes. Vídeo: https://www.youtube.com/watch?v=OrQNa37LFPg",
+    "example": "Ejecutar 'pathping google.es' detecta en qué salto exacto del proveedor se pierden paquetes.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "TTL (Deducción de SO)",
+    "full": "Time To Live",
+    "definition": "El campo TTL en la cabecera IP revela el SO: un TTL cercano a 64 indica Linux/Router; un TTL cercano a 128 indica Windows.",
+    "example": "Si al hacer ping recibes 'ttl=128', el objetivo es casi seguro un Windows.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Banderas TCP en Wireshark",
+    "full": "Detección de escaneos",
+    "definition": "Un Null Scan (nmap -sN) muestra banderas <none> o [ ] en Wireshark. Los puertos cerrados responden a los escaneos con un paquete [RST, ACK] (marcado en rojo).",
+    "example": "Filtrar por 'tcp.flags == 0' en Wireshark delata un ataque Null Scan.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "WCA",
+    "full": "Wireshark Certified Analyst",
+    "definition": "Certificación oficial sobre captura de paquetes, filtros BPF, análisis de protocolos y diagnóstico de seguridad.",
+    "example": "Acredita tu capacidad para investigar incidentes analizando archivos .pcapng.",
+    "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Sistemas de Numeración",
+    "full": "Binario, Decimal, Hexadecimal y Octal",
+    "definition": "Formas de representar valores. Decimal es base 10. Binario base 2. Octal base 8 (0-7). Hexadecimal base 16 (0-9 y A-F) usado para MACs o IPv6[cite: 15].",
+    "example": "El 11 decimal es B en Hexadecimal[cite: 15].",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Puertas Lógicas (AND, OR, NOT)",
+    "full": "Operaciones Booleanas",
+    "definition": "Circuitos electrónicos para lógica binaria. AND multiplica (da 1 si ambos son 1). OR suma. NOT invierte. NAND/NOR entregan el resultado invertido[cite: 15].",
+    "example": "Los equipos IP usan la puerta lógica AND entre su IP y su máscara de subred para saber a qué red pertenecen[cite: 15].",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Armarios Racks (U y pulgadas)",
+    "full": "",
+    "definition": "Armarios estandarizados para CPD. El ancho estándar es de 19 pulgadas. La altura se mide en 'U' (Unidades, 1U = 4.445 cm)[cite: 15].",
+    "example": "Para instalar un servidor de 2U y un switch de 1U, necesitas al menos 3U libres en el rack[cite: 15].",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Climatización de CPD",
+    "full": "Down Flow y Up Flow",
+    "definition": "En un CPD (18-25°C), se separan pasillos fríos (entrada frontal) y calientes (extracción trasera). 'Down Flow' es aire frío desde el suelo técnico; 'Up Flow' desde el falso techo[cite: 15].",
+    "example": "Los paneles ciegos en racks evitan que el aire caliente vuelva a circular hacia el pasillo frío[cite: 15].",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Anomalías Eléctricas y KVA",
+    "full": "Sistemas SAI / UPS",
+    "definition": "Las anomalías eléctricas incluyen caídas de tensión, picos o ruido electromagnético. Se mitigan con un SAI, cuya capacidad de potencia se mide en KVA (Kilovoltios x amperio)[cite: 15].",
+    "example": "Un SAI reconstruye la onda de 230V y absorbe las caídas de tensión para que el servidor no se apague[cite: 15].",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Fuego y Tipos (A, B, C, D)",
+    "full": "Tetraedro del fuego",
+    "definition": "El fuego requiere: Combustible, Comburente (Oxígeno), Calor y Reacción en cadena. Tipos: A (Sólidos), B (Líquidos), C (Gases), D (Metales combustibles)[cite: 15].",
+    "example": "En un CPD se extingue el fuego inyectando gas para eliminar el oxígeno, sin usar agua a chorro que dañaría los equipos[cite: 15].",
+    "module": "Bloque 6 · Continuidad y Normativa"
+  },
+  {
+    "term": "Biometría Fisiológica vs Comportamiento",
+    "full": "Técnicas de autenticación",
+    "definition": "Fisiológica mide rasgos físicos inalterables (huella, iris, ADN). Comportamiento mide cómo haces una acción (firma dinámica evaluando presión/velocidad, reconocimiento de tecleo)[cite: 15].",
+    "example": "Identificar a un usuario por la cadencia con la que escribe en el teclado es biometría de comportamiento[cite: 15].",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Código ASCII",
+    "full": "American Standard Code for Information Interchange",
+    "definition": "Estándar que asigna valores numéricos a letras, números y símbolos para que los ordenadores puedan procesar texto usando sistema binario[cite: 15].",
+    "example": "La letra 'A' mayúscula corresponde al valor decimal 65[cite: 15].",
+    "module": "Bloque 1 · Hardware y Sistemas"
+  },
+  {
+    "term": "Metadatos",
+    "full": "",
+    "definition": "Son 'datos sobre los datos'. Propiedades ocultas dentro de un archivo, como autor, software de edición o ubicación GPS[cite: 15].",
+    "example": "Un PDF puede contener metadatos que revelen el nombre de usuario de Windows de quien lo creó[cite: 15].",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Nmap: -iL, -iR, --exclude",
+    "full": "Especificación de Objetivos",
+    "definition": "-iL <fichero> carga los objetivos desde un archivo de texto. -iR <num> elige objetivos aleatorios en Internet. --exclude <hosts> omite las IPs indicadas del escaneo[cite: 13].",
+    "example": "nmap -iL lista_ips.txt --exclude 192.168.1.1 (Escanea las IPs del archivo menos la puerta de enlace).",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -Pn, -sn, -PR, -PS, -PA, -PU",
+    "full": "Descubrimiento de equipos (Ping Sweep)",
+    "definition": "-Pn no hace ping (asume que están vivos). -sn solo lista equipos vivos sin escanear puertos. -PR hace ping ARP (red local). -PS y -PA envían ping TCP SYN o ACK. -PU usa UDP[cite: 13].",
+    "example": "nmap -Pn 192.168.1.50 (Fuerza el escaneo de puertos aunque el firewall del objetivo bloquee los pings ICMP)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -n, -R, --traceroute",
+    "full": "DNS y Rutas",
+    "definition": "-n desactiva la resolución DNS (hace el escaneo más rápido y sigiloso). -R fuerza la resolución DNS para todos. --traceroute descubre los saltos de red hasta el objetivo[cite: 13].",
+    "example": "nmap -n --traceroute 8.8.8.8 (Escanea sin buscar el nombre de dominio y traza la ruta)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -sS, -sT, -sU",
+    "full": "Técnicas de Análisis Base",
+    "definition": "-sS (SYN Stealth) envía un SYN y corta la conexión con RST si está abierto; es rápido y sigiloso. -sT (TCP Connect) completa la conexión; deja mucho rastro. -sU escanea puertos UDP[cite: 13].",
+    "example": "nmap -sS -sU 10.0.0.5 (Escanea a la vez los puertos TCP de forma sigilosa y los UDP)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -sN, -sF, -sX, -sA",
+    "full": "Análisis Sigilosos y Evasión",
+    "definition": "-sN (Null) envía paquete sin banderas. -sF (FIN) activa solo FIN. -sX (Xmas) activa FIN, PSH y URG. -sA (TCP ACK) sirve para descubrir si un puerto está filtrado por un firewall[cite: 13].",
+    "example": "Los escaneos Null/FIN/Xmas funcionan bien en Linux (responde RST si está cerrado), pero en Windows no son fiables[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -p, -F, --top-ports",
+    "full": "Especificación de Puertos",
+    "definition": "-p permite indicar puertos (ej. -p 80,443 o -p 1-1024). -p- escanea los 65535 puertos. -F (Fast) escanea solo los 100 puertos más comunes. --top-ports <num> escanea el número de puertos más usados[cite: 13].",
+    "example": "nmap -p T:80,U:53 objetivo (Escanea TCP 80 y UDP 53)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -sV, -O, -A",
+    "full": "Detección de Versiones y Sistemas",
+    "definition": "-sV interroga a los puertos abiertos para descubrir qué servicio y versión corren. -O lanza pruebas para adivinar el Sistema Operativo. -A (Agresivo) activa todo: -O, -sV, -sC y traceroute a la vez[cite: 13].",
+    "example": "nmap -A 192.168.1.10 (Escaneo completo que te dirá desde la versión de Apache hasta si es Linux o Windows)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -f, -D, -S, -g",
+    "full": "Evasión de Cortafuegos y Spoofing",
+    "definition": "-f fragmenta paquetes. -D <IP1,IP2,ME> usa señuelos (decoys) para camuflar tu IP. -S <IP> falsea tu IP de origen. -g (o --source-port) fuerza a que tus escaneos salgan desde un puerto origen concreto (ej. 53)[cite: 13].",
+    "example": "nmap -D 10.0.0.5,10.0.0.6,ME objetivo (El firewall del objetivo verá escaneos desde tres IPs distintas)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -T0 a -T5",
+    "full": "Plantillas de Temporización (Timing)",
+    "definition": "Controla la velocidad del escaneo. -T0 (Paranoid) y -T1 son lentísimos para evadir IDS. -T3 es Normal. -T4 (Aggressive) es rápido y recomendado en redes modernas fiables. -T5 (Insane) puede perder resultados[cite: 13].",
+    "example": "nmap -T4 192.168.1.0/24 (Escaneo rápido de toda la subred)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -sC, --script",
+    "full": "Nmap Scripting Engine (NSE)",
+    "definition": "-sC lanza los scripts de vulnerabilidad y enumeración por defecto. --script <nombre> permite ejecutar scripts específicos (ej. de fuerza bruta o detección de CVEs)[cite: 13].",
+    "example": "nmap --script smb-os-discovery 192.168.1.15 (Ejecuta un script específico para auditar SMB)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -oN, -oX, -oG, -oA",
+    "full": "Formatos de Salida",
+    "definition": "Guardan los resultados. -oN (Normal en texto). -oX (formato XML). -oG (Grepable, todo en una línea para usar con 'grep'). -oA <nombre> guarda en los tres formatos a la vez[cite: 13].",
+    "example": "nmap -oA auditoria_red 10.0.0.0/24 (Genera tres archivos: auditoria_red.nmap, .xml y .gnmap)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: -v, -d, --packet-trace",
+    "full": "Verbosidad y Depuración",
+    "definition": "-v aumenta la información en pantalla mientras escanea (puedes usar -vv). -d activa modo depuración. --packet-trace muestra cada paquete enviado y recibido al detalle[cite: 13].",
+    "example": "nmap -v -sS 192.168.1.1 (Te irá avisando en tiempo real cada vez que encuentre un puerto abierto)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Nmap: --open, --iflist",
+    "full": "Miscelánea",
+    "definition": "--open hace que la salida final solo muestre los puertos abiertos (oculta los closed o filtered). --iflist imprime el listado de interfaces y rutas detectado por Nmap (útil para depuración)[cite: 13].",
+    "example": "nmap --open -p- 10.0.0.5 (Escanea todos los puertos pero no te satura la pantalla con los cerrados)[cite: 13].",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
     "term": "Procesador",
     "full": "",
     "definition": "¿Qué es?\nEl procesador es como el cerebro del ordenador. Es la pieza principal que recibe las instrucciones de los programas y hace los cálculos matemáticos y lógicos necesarios para que el equipo funcione.\n\n¿Para qué sirve?\nSirve para coordinar el resto de los componentes del ordenador y ejecutar las tareas que le pedimos.\n\nSe relaciona con:\nPrograma → CPU → cálculo → resultado",
@@ -1725,7 +1921,7 @@ function renderGlosarioHtml(){
             </div>
           </div>
           <div class="term-body ${open?'open':''}">
-            <div class="term-def">${escapeHtml(e.definition)}</div>
+            <div class="term-def">${linkify(escapeHtml(e.definition))}</div>
             ${e.example ? `<div class="term-ex">${escapeHtml(e.example)}</div>` : ''}
           </div>
         </div>`;
@@ -1760,7 +1956,7 @@ function renderCardsHtml(){
           </div>
           <div class="fc-face back">
             <div class="fc-tag">Definición</div>
-            <div class="fc-def">${escapeHtml(e.definition)}</div>
+            <div class="fc-def">${linkify(escapeHtml(e.definition))}</div>
             ${e.example ? `<div class="fc-ex">${escapeHtml(e.example)}</div>` : ''}
           </div>
         </div>
@@ -2095,14 +2291,23 @@ function attachTabHandlers(){
   }
 }
 
-document.querySelectorAll('.navbtn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    currentTab = btn.getAttribute('data-tab');
-    if(currentTab==='cards') startFlashcards();
-    if(currentTab==='quiz'){ quizQuestions=[]; quizFinished=false; }
-    openTermId = null;
-    render();
-  });
+document.querySelectorAll('.navbtn').forEach(btn=>{ 
+  btn.addEventListener('click', ()=>{ 
+    currentTab = btn.getAttribute('data-tab'); 
+    
+    // Al cambiar al glosario, aseguramos que quede solo 1 bloque activo para no saturar la vista
+    if(currentTab === 'glosario') {
+        const mods = allModulesUsed();
+        if(selectedModules.size !== 1 && mods.length > 0) {
+            selectedModules = new Set([mods[0]]);
+        }
+    }
+    
+    if(currentTab==='cards') startFlashcards(); 
+    if(currentTab==='quiz'){ quizQuestions=[]; quizFinished=false; } 
+    openTermId = null; 
+    render(); 
+  }); 
 });
 
 /* ============ UTIL ============ */
@@ -2111,6 +2316,10 @@ function escapeHtml(str){
 }
 function escapeAttr(str){ return escapeHtml(str); }
 
+function linkify(str) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return str.replace(urlRegex, '<a href="$1" target="_blank" style="color:var(--accent); text-decoration:underline;">$1</a>');
+}
 /* ============ HELPERS ============ */
 function allModulesUsed(){
   const set = new Set(entries.map(e=>e.module));
@@ -2131,43 +2340,53 @@ function filteredEntries(){
 
 /* ============ RENDER: CHIPS ============ */
 function renderChips(){
-  const wrap = document.getElementById('moduleChips');
-  const hint = document.getElementById('moduleHint');
-  const mods = allModulesUsed();
-
-  if(hint){
-    if(currentTab==='glosario'){
-      hint.textContent = 'Toca uno o varios bloques para filtrar (todos = todos marcados)';
-    } else if(currentTab==='cards'){
-      hint.textContent = 'Elige de qué bloques quieres tarjetas — puedes combinar varios';
-    } else if(currentTab==='quiz'){
-      hint.textContent = 'Elige de qué bloques salen las preguntas — puedes combinar varios';
-    } else {
-      hint.textContent = '';
-    }
+  const wrap = document.getElementById('moduleChips'), hint = document.getElementById('moduleHint'), mods = allModulesUsed();
+  
+  // Lógica: Si estamos en el Glosario y no hay exactamente 1 bloque seleccionado, forzamos que se seleccione el primero
+  if (currentTab === 'glosario' && selectedModules.size !== 1 && mods.length > 0) {
+    selectedModules = new Set([mods[0]]);
   }
 
+  if(hint){
+    if(currentTab==='glosario') hint.textContent = 'Toca un bloque para estudiar su contenido de forma individual';
+    else if(currentTab==='cards') hint.textContent = 'Elige de qué bloques quieres tarjetas (puedes marcar varios)';
+    else if(currentTab==='quiz') hint.textContent = 'Elige de qué bloques salen las preguntas (puedes marcar varios)';
+    else hint.textContent = '';
+  }
+  
   wrap.innerHTML = mods.map(m=>{
     const label = m.split('·')[0].trim();
-    const active = (selectedModules.size===0 || selectedModules.has(m)) ? 'active' : '';
+    let active = '';
+    
+    // En glosario resaltamos solo si está en el Set. En el resto, si el Set está vacío, significa "Todos activos".
+    if (currentTab === 'glosario') {
+      active = selectedModules.has(m) ? 'active' : '';
+    } else {
+      active = (selectedModules.size===0 || selectedModules.has(m)) ? 'active' : '';
+    }
     return `<button class="chip ${active}" data-mod="${escapeAttr(m)}">${escapeHtml(label)}</button>`;
   }).join('');
-
+  
   wrap.querySelectorAll('.chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const m = btn.getAttribute('data-mod');
-      if(selectedModules.size===0){
-        selectedModules = new Set(mods.filter(x=>x!==m));
-      } else if(selectedModules.has(m)){
-        selectedModules.delete(m);
-        if(selectedModules.size===0){
-          mods.forEach(x=>selectedModules.add(x));
-          selectedModules.delete(m);
-        }
+      
+      if (currentTab === 'glosario') {
+        // MODO SELECCIÓN ÚNICA (Solo para Glosario)
+        selectedModules = new Set([m]);
       } else {
-        selectedModules.add(m);
-        if(selectedModules.size===mods.length) selectedModules = new Set();
+        // MODO SELECCIÓN MÚLTIPLE (Para Tarjetas y Quiz)
+        if(selectedModules.size===0) selectedModules = new Set(mods.filter(x=>x!==m));
+        else if(selectedModules.has(m)){ 
+            selectedModules.delete(m); 
+            if(selectedModules.size===0){ mods.forEach(x=>selectedModules.add(x)); selectedModules.delete(m); } 
+        }
+        else { 
+            selectedModules.add(m); 
+            if(selectedModules.size===mods.length) selectedModules = new Set(); 
+        }
       }
+      
       if(currentTab==='cards') startFlashcards();
       if(currentTab==='quiz') { quizQuestions=[]; quizFinished=false; }
       render();
