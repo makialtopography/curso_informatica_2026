@@ -1561,7 +1561,288 @@ SEED_DATA.push(
     "definition": "¿Qué es?\nSon los exámenes oficiales más respetados por las empresas de Recursos Humanos del sector TI para demostrar conocimientos avanzados.\n\nRuta estándar:\n1. ISC2 CC: Certificado gratuito de nivel de entrada.\n2. CompTIA Network+: Para demostrar que dominas cómo viajan los datos (TCP, UDP, DNS, IPs).\n3. CompTIA Security+ (SY0-701): Es el certificado más pedido mundialmente para el primer trabajo en ciberseguridad.\n4. CCNA (Cisco): El estándar de oro mundial para ingenieros de redes complejas.\n5. OSCP: El examen más respetado para Pentesters (dura 24 horas seguidas de hackeo práctico intenso en máquinas reales).",
     "example": "Ejemplo:\nTras sacarse la Security+ de CompTIA (conocimientos básicos defensivos), el alumno decide que le gusta atacar. Estudia intensamente durante un año, aprueba el duro examen práctico de OSCP y consigue trabajo como Pentester Senior.",
     "module": "Bloque 7 · Profesión"
+  },
+  {
+    "term": "Modelo OSI (Visión general)",
+    "full": "Open Systems Interconnection",
+    "definition": "Modelo teórico de 7 capas que divide y estandariza los problemas de comunicación en red. Va desde lo físico (cable, Capa 1) hasta las aplicaciones (HTTP, Capa 7).",
+    "example": "Wireshark muestra los paquetes basándose en OSI: Frame (Capa 1), Ethernet II (Capa 2), Internet Protocol (Capa 3), TCP/UDP (Capa 4)...",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Capa 2 del Modelo OSI",
+    "full": "Capa de Enlace de Datos",
+    "definition": "Capa encargada de la transferencia nodo a nodo dentro de una misma red local (LAN). Aquí operan los Switches y se utiliza el direccionamiento físico mediante direcciones MAC.",
+    "example": "Cuando analizas la cabecera 'Ethernet II' en Wireshark, estás mirando exclusivamente los datos de Capa 2 (las direcciones físicas de origen y destino).",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Estructura de la Dirección MAC",
+    "full": "Media Access Control Address",
+    "definition": "Dirección física de 48 bits (6 bytes) en formato hexadecimal que identifica de forma única a una tarjeta de red en todo el mundo. Los primeros 3 bytes (OUI) indican el fabricante, y los 3 últimos son asignados por este como un identificador único.",
+    "example": "En la MAC '54-d4-6f-dc-b8-21', la parte '54-d4-6f' revelará en Wireshark qué marca fabricó ese adaptador de red.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Dirección de Difusión ARP (Broadcast)",
+    "full": "MAC ff:ff:ff:ff:ff:ff",
+    "definition": "Dirección física especial utilizada en el protocolo ARP cuando un equipo necesita averiguar la MAC asociada a una IP específica. Al enviar un paquete a esta dirección, obliga a todos los dispositivos de la red local a recibirlo y procesarlo.",
+    "example": "Si el PC quiere hablar con 192.168.1.10 y no conoce su MAC, lanza un grito (Who has...?) a la dirección 'ff:ff:ff:ff:ff:ff' para que el dueño responda con su MAC real.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "ARP Request / ARP Reply",
+    "full": "Petición y Respuesta ARP",
+    "definition": "Son los dos mensajes principales del protocolo. Un 'Request' se envía por Broadcast preguntando '¿Quién tiene esta IP?'. El 'Reply' es la respuesta Unicast donde el dispositivo destino entrega su dirección MAC.",
+    "example": "En Wireshark, para ver si un equipo está intentando descubrir la red, aplicas el filtro 'arp' y buscas los paquetes de tipo 'Request' (Who has...?).",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "arp -a",
+    "full": "Mostrar tabla ARP",
+    "definition": "Comando de consola que muestra la tabla o caché ARP actual del sistema operativo. Lista las direcciones lógicas (IP) de la red local junto con las direcciones físicas (MAC) que el equipo ha descubierto.",
+    "example": "Se utiliza habitualmente para auditar la red local y comprobar con qué otros equipos se ha estado comunicando nuestro ordenador recientemente.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "arp -s",
+    "full": "Añadir entrada estática ARP",
+    "definition": "Comando que permite asociar manualmente y de forma permanente una dirección IP a una dirección MAC específica dentro de la tabla ARP del sistema.",
+    "example": "Ejecutar 'arp -s 192.168.1.1 00-11-22-33-44-55' evita ataques de envenenamiento (ARP Spoofing), ya que obliga al equipo a ignorar respuestas ARP falsas para la IP del router.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "arp -d",
+    "full": "Borrar la caché ARP",
+    "definition": "Comando de consola (CMD) que elimina las entradas dinámicas de la tabla ARP. Se utiliza en laboratorios para forzar al ordenador a volver a preguntar (Broadcast) por las MACs, permitiendo capturar el proceso desde cero.",
+    "example": "Ejecutar 'arp -d *' (como administrador) limpia la tabla. Si luego abres Wireshark y haces un ping, capturarás perfectamente el paquete 'Who has IP?'.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "ARP Spoofing / Envenenamiento ARP",
+    "full": "Suplantación de identidad por ARP",
+    "definition": "Ataque en el que un equipo malicioso envía mensajes ARP falsos a la red local. Su objetivo es asociar su propia dirección MAC con la IP de un equipo legítimo (generalmente el router), interceptando así todo el tráfico (Man-in-the-Middle).",
+    "example": "El atacante inunda la red diciendo 'Yo soy la IP 192.168.1.1' para que los PCs actualicen su tabla ARP y le envíen a él los paquetes de Internet.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "Wireshark",
+    "full": "Analizador de protocolos (Sniffer)",
+    "definition": "Herramienta de software que permite capturar, diseccionar y analizar en tiempo real todo el tráfico de datos que entra y sale a través de una interfaz de red (como una tarjeta Wi-Fi o Ethernet).",
+    "example": "Se utiliza en auditoría para interceptar comunicaciones, diagnosticar problemas de red o cazar paquetes ARP Request cuando un equipo intenta descubrir a otros en la red local.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Filtros de visualización",
+    "full": "Aislamiento de tráfico en Wireshark",
+    "definition": "Funcionalidad crítica para reducir el ruido en una captura de red. Permite introducir expresiones lógicas para mostrar solo paquetes específicos por protocolo (ej. arp, http, tls) o por origen/destino (ej. ip.addr == 192.168.1.1).",
+    "example": "Si hay miles de paquetes en la red, escribir 'arp' en la barra de filtros aísla instantáneamente los mensajes de 'Who has...?' y 'is at...'.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Fingerprinting HTTP (Wireshark)",
+    "full": "Extracción de huellas de servidor",
+    "definition": "Técnica pasiva de reconocimiento. Al observar el panel de detalles HTTP en Wireshark, las cabeceras como 'Server' o 'X-Powered-By' revelan el software exacto y la versión que usa el servidor objetivo.",
+    "example": "Si interceptas un 'X-Powered-By: PHP/7.0', sabes que el servidor usa una tecnología obsoleta, lo que abre vectores para buscar vulnerabilidades públicas (CVEs) de esa versión.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Rutas de Aplicación Web (WP)",
+    "full": "Identificación de CMS",
+    "definition": "Analizar las peticiones GET en la columna Info de Wireshark permite descubrir la estructura interna de la web. Las rutas que contienen '/wp-content/plugins/' o '/wp-admin/' delatan inmediatamente el uso de WordPress.",
+    "example": "Un analista SOC puede detectar un ataque si ve escaneos masivos buscando rutas como '/wp-content/plugins/revslider/' intentando explotar un plugin vulnerable.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Application Data (Wireshark)",
+    "full": "Datos de Aplicación Cifrados",
+    "definition": "Es la etiqueta que muestra Wireshark cuando captura la carga útil (payload) de una conexión que ya ha sido cifrada mediante TLS. El contenido es completamente ilegible para el analista sin la clave privada.",
+    "example": "Si filtras por 'tls' en Wireshark, verás múltiples paquetes 'Application Data'; debajo de eso viaja el tráfico HTTP (como el HTML o imágenes), pero no puedes leerlo.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Arquitectura Cliente-Servidor",
+    "full": "Modelo centralizado web",
+    "definition": "Modelo de red donde un equipo (el cliente o navegador) inicia peticiones de información, y otro equipo dedicado (el servidor web) está a la escucha en un puerto específico para procesarlas y devolver los datos.",
+    "example": "Cuando abres un sitio web, tu ordenador (el cliente) realiza solicitudes directas al servidor donde está alojada la aplicación.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Protocolo Stateless (Sin estado)",
+    "full": "Cierre de conexión en HTTP",
+    "definition": "El protocolo HTTP básico carece de memoria. Cada petición (como pedir el texto de una web o una imagen) es una transacción aislada. Una vez el servidor envía el archivo solicitado, cierra la conexión IP inmediatamente.",
+    "example": "Como HTTP no recuerda quién eres entre un clic y otro, los desarrolladores utilizan 'Cookies' (ej. PHPSESSID) para mantener la sesión abierta.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Estructura de Transacción HTTP",
+    "full": "Petición y Respuesta HTTP",
+    "definition": "Toda comunicación HTTP consta de texto plano estructurado: una línea inicial (petición o estado), varias cabeceras (headers) con metadatos, una LÍNEA EN BLANCO obligatoria que marca el final de las cabeceras, y finalmente el cuerpo (payload) con los datos.",
+    "example": "En Wireshark se observa que entre la cabecera 'Content-Type' y el inicio del contenido de la respuesta ('<HTML>') hay un salto de línea en blanco.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Cabeceras HTTP (Tipos I)",
+    "full": "Generales y de Petición",
+    "definition": "Las cabeceras HTTP envían metadatos (Nombre: Valor). Las 'Generales' aplican a peticiones y respuestas sin afectar al cuerpo del mensaje. Las de 'Petición' envían datos sobre el cliente o el recurso que se quiere obtener.",
+    "example": "El 'User-Agent' es una cabecera de petición donde el navegador del cliente se identifica ante el servidor web.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Cabeceras HTTP (Tipos II)",
+    "full": "De Respuesta y de Entidad",
+    "definition": "Las cabeceras de 'Respuesta' proporcionan información sobre el servidor (nombre, versión). Las de 'Entidad' detallan las características del cuerpo del mensaje, como su tamaño en bytes o su formato (tipo MIME).",
+    "example": "'Content-Type: text/html' es una cabecera de entidad que advierte de que el cuerpo de la respuesta contiene código web HTML.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Cabeceras HTTP: Host y Accept",
+    "full": "Identificación de destino y formatos",
+    "definition": "En una petición HTTP, la cabecera 'Host' indica el nombre del servidor al que nos dirigimos. La cabecera 'Accept' le dice al servidor qué formatos (MIME types, como text/html o image/jpeg) es capaz de leer el navegador.",
+    "example": "El servidor lee la cabecera 'Accept' y 'User-Agent' para adaptar los formatos y gráficos de la web según el dispositivo del usuario.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Cabecera HTTP: Last-Modified",
+    "full": "Gestión de Caché",
+    "definition": "Cabecera de respuesta del servidor que indica la fecha y hora exacta en la que el archivo solicitado fue modificado por última vez.",
+    "example": "El navegador compara esta fecha con la que tiene en caché local para evitar descargar nuevamente archivos que no han cambiado.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Métodos HTTP (GET vs POST)",
+    "full": "Solicitar vs Enviar datos",
+    "definition": "GET se utiliza para solicitar o leer información del servidor (cargar una página). POST se introdujo para enviar datos desde el cliente hacia el servidor, habitualmente al rellenar formularios o enviar credenciales.",
+    "example": "Las peticiones POST son analizadas en auditoría porque suelen contener datos sensibles como credenciales de inicio de sesión.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Métodos HTTP (HEAD, PUT, DELETE)",
+    "full": "Control y Gestión",
+    "definition": "HEAD solicita solo las cabeceras de respuesta. PUT sirve para subir archivos al servidor y DELETE para borrarlos. En producción, PUT y DELETE se deshabilitan por motivos de seguridad.",
+    "example": "Si un servidor web mantiene habilitado el método PUT, un atacante podría intentar subir archivos maliciosos ejecutables.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "HTTP 200",
+    "full": "200 OK (Éxito)",
+    "definition": "Código de estado HTTP estándar que indica que la solicitud del cliente ha sido procesada con éxito por el servidor y que la respuesta contiene el recurso solicitado.",
+    "example": "Indica que una solicitud web se ha completado correctamente sin errores ni redirecciones.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "HTTP 301",
+    "full": "Moved Permanently (Movido permanentemente)",
+    "definition": "Código de estado de redirección HTTP. Indica que el recurso solicitado ha cambiado definitivamente de URL. El servidor envía la nueva dirección en la cabecera 'Location' y el navegador salta automáticamente.",
+    "example": "Es común capturar este código cuando un servidor redirige el tráfico no seguro (HTTP) hacia la versión segura (HTTPS).",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "HTTP 302 y 304",
+    "full": "Redirección Temporal y Caché",
+    "definition": "El código 302 (Found) indica que un recurso se ha movido temporalmente. El código 304 (Not Modified) indica que el archivo no ha cambiado desde la última visita y debe cargarse desde la caché local.",
+    "example": "Las respuestas 304 evitan transferencias innecesarias de archivos pesados de la web.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Códigos HTTP 4xx",
+    "full": "Errores del Cliente",
+    "definition": "Códigos de estado que indican un problema provocado por la solicitud del cliente. Incluyen 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden) y 404 (Not Found).",
+    "example": "Las solicitudes hacia URLs inexistentes dentro de un sitio web devuelven un código 404 Not Found.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Códigos HTTP 5xx",
+    "full": "Errores del Servidor",
+    "definition": "Indican que el servidor no pudo completar una solicitud aparentemente válida debido a un fallo interno. Los más comunes son 500 (Internal Server Error) y 503 (Service Unavailable).",
+    "example": "Un fallo imprevisto en la base de datos o en la ejecución del código backend del servidor genera una respuesta HTTP 500.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "Protocolos en texto plano",
+    "full": "Cleartext protocols",
+    "definition": "Protocolos de red que envían la información sin cifrar. Si un atacante intercepta el tráfico con Wireshark, puede leer todo el contenido, incluyendo contraseñas, cookies y datos personales.",
+    "example": "HTTP (puerto 80), FTP (puerto 21) y Telnet (puerto 23) son altamente inseguros en redes públicas porque su 'payload' es 100% legible por un sniffer.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Puertos web estándar",
+    "full": "Puertos 80 y 443",
+    "definition": "Son los puertos lógicos TCP asignados por defecto para el tráfico web. El puerto 80 se utiliza para tráfico HTTP (inseguro/texto plano), mientras que el puerto 443 se reserva para tráfico HTTPS (seguro/cifrado).",
+    "example": "Al auditar un servidor con Nmap, encontrar el puerto 80 abierto es un hallazgo que requiere verificar si el servidor fuerza la redirección (código 301) hacia el puerto 443 seguro.",
+    "module": "Bloque 2 · Redes y Protocolos"
+  },
+  {
+    "term": "HTTP vs HTTPS",
+    "full": "Texto plano frente a Cifrado",
+    "definition": "HTTP transmite los datos web en texto plano, lo que permite a cualquier sniffer de red leer la información. HTTPS añade una capa de seguridad (TLS/SSL) que cifra los datos en tránsito, garantizando la confidencialidad y la integridad de la comunicación.",
+    "example": "Si haces login en una web HTTP, tu contraseña viaja visible. Si lo haces en HTTPS, viaja como un bloque de datos cifrados indescifrable.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "HTTPS",
+    "full": "HTTP + TLS (Hypertext Transfer Protocol Secure)",
+    "definition": "Es la versión segura del protocolo web. Funciona encapsulando las comunicaciones HTTP tradicionales dentro de un túnel criptográfico TLS, cifrando todo el contenido (cabeceras, métodos, cuerpo y cookies).",
+    "example": "Al auditar una página de login, si la URL empieza por HTTPS, sabemos que las credenciales viajarán protegidas frente a ataques de interceptación local.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "TLS Handshake",
+    "full": "Saludo TLS (Negociación)",
+    "definition": "Es la fase inicial de una conexión segura. El cliente y el servidor negocian qué algoritmos criptográficos usar, intercambian certificados digitales para verificar la identidad y generan las claves de cifrado.",
+    "example": "En Wireshark, los paquetes 'Client Hello' y 'Server Hello' indican que un ordenador y un servidor están realizando el handshake TLS antes de empezar a enviar datos útiles.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "ClientHello / ServerHello",
+    "full": "Fase de negociación TLS",
+    "definition": "Son los primeros mensajes del TLS Handshake. El cliente envía las versiones de TLS y los algoritmos criptográficos (cipher suites) que soporta. El servidor responde eligiendo el nivel de seguridad más alto que ambos compartan.",
+    "example": "En Wireshark, interceptar un 'ClientHello' te indica exactamente qué nivel de cifrado está solicitando el navegador antes de establecer el túnel seguro.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Certificado Digital (TLS)",
+    "full": "Identidad del Servidor",
+    "definition": "Documento electrónico que el servidor envía durante el Handshake para demostrar su identidad. Contiene la clave pública del servidor y debe estar firmado por una Autoridad de Certificación (CA) de confianza.",
+    "example": "Si el cliente no logra validar el Certificado Digital (por estar caducado o autofirmado), el navegador bloqueará la web y mostrará la pantalla de advertencia 'La conexión no es segura'.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Clave de Sesión (Session Key)",
+    "full": "Cifrado final de la conexión",
+    "definition": "Es una clave criptográfica temporal generada por ambos equipos al final del TLS Handshake (usando el premaster secret). Se utiliza exclusivamente para cifrar el tráfico de datos (Application Data) de esa sesión en concreto.",
+    "example": "Una vez que el cliente y el servidor han calculado la Session Key, la fase de 'saludo' termina y comienza la transmisión segura del tráfico HTTP.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "El Mito del Candado (HTTPS)",
+    "full": "Conexión segura vs. Sitio seguro",
+    "definition": "Tener HTTPS (el candado en el navegador) solo significa que la conexión entre el cliente y el servidor está cifrada. NO significa que la página web sea legítima, ni garantiza que la persona detrás del servidor no sea un ciberdelincuente.",
+    "example": "Un usuario confía en una página falsa del banco porque ve el candado, sin darse cuenta de que simplemente está enviando sus credenciales de forma cifrada al servidor del atacante.",
+    "module": "Bloque 3 · Seguridad e Identidad"
+  },
+  {
+    "term": "Let's Encrypt en Phishing",
+    "full": "Abuso de certificados gratuitos",
+    "definition": "Autoridad de Certificación (CA) legítima que ofrece certificados TLS gratuitos y automatizados. Los atacantes la utilizan masivamente para obtener certificados de confianza para sus dominios falsos y dar apariencia de legitimidad a sus páginas de phishing.",
+    "example": "Un atacante registra 'paypal-login-seguro.com', usa Let's Encrypt para instalarle un certificado en 5 minutos, y lanza una campaña de correos fraudulentos con enlaces HTTPS.",
+    "module": "Bloque 5 · Riesgos y Ataques"
+  },
+  {
+    "term": "HTTrack",
+    "full": "Clonador de sitios web (Offline Browser)",
+    "definition": "Herramienta multiplataforma de software libre que descarga todo el contenido de una página web (HTML, directorios, imágenes) a un disco local. Recrea la estructura de enlaces para permitir la navegación sin conexión a Internet.",
+    "example": "En ciberseguridad, un auditor usa HTTrack para descargar una web y buscar con calma en su código fuente contraseñas, comentarios o rutas ocultas que los programadores olvidaron borrar.",
+    "module": "Bloque 4 · Auditoría y Herramientas"
+  },
+  {
+    "term": "Clonación para Phishing",
+    "full": "Suplantación visual (Frontend)",
+    "definition": "Técnica de ingeniería social en la que un atacante copia la apariencia exacta de una web legítima (ej. usando HTTrack) y la aloja en un servidor malicioso. El objetivo es engañar a la víctima para que introduzca sus credenciales.",
+    "example": "El ciberdelincuente clona la web del banco, modifica el formulario HTTP POST para que las contraseñas se guarden en su servidor, y distribuye el enlace falso mediante campañas de correo (Spam).",
+    "module": "Bloque 5 · Riesgos y Ataques"
   }
+
 );
 const QUESTION_BANK = [];
 
@@ -1969,56 +2250,178 @@ function renderCardsHtml(){
 }
 
 /* ============ QUIZ ============ */
-function buildQuiz(){
-  const pool = filteredEntries();
-  const fixedPool = QUESTION_BANK.filter(q => selectedModules.size === 0 || selectedModules.has(q.module));
+function normalizeQuestionText(value){
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
 
-  // 1. Generar preguntas automáticas desde las tarjetas
-  const autoQuestions = pool.map(correct => {
-    const others = pool.filter(e => e.id !== correct.id);
-    const distractors = shuffle(others).slice(0, 3).map(o => o.definition);
-    const askTermToDef = Math.random() > 0.4 || pool.length < 4;
-    let prompt, correctOption, options;
-    
-    if(askTermToDef){
-      prompt = `¿Cuál es la definición de <span class="mono">${escapeHtml(correct.term)}</span>?`;
-      correctOption = correct.definition;
-      options = shuffle([correctOption, ...distractors]);
-    } else {
-      prompt = `¿A qué término corresponde esta definición?\n\n"${escapeHtml(correct.definition)}"`;
-      correctOption = correct.term;
-      const termDistractors = shuffle(others).slice(0, 3).map(o => o.term);
-      options = shuffle([correct.term, ...termDistractors]);
+function makeAutoQuestion(correct, pool, mode){
+  const others = pool.filter(e => e.id !== correct.id);
+  if(others.length < 1) return null;
+
+  const cleanDef = normalizeQuestionText(correct.definition);
+  const cleanExample = normalizeQuestionText(correct.example);
+  const cleanFull = normalizeQuestionText(correct.full);
+
+  let prompt = '';
+  let correctOption = '';
+  let options = [];
+
+  if(mode === 'termToDefinition'){
+    prompt = `¿Cuál es la definición de <span class="mono">${escapeHtml(correct.term)}</span>?`;
+    correctOption = cleanDef;
+    const distractors = shuffle(others)
+      .map(o => normalizeQuestionText(o.definition))
+      .filter(Boolean)
+      .filter((v,i,a)=>a.indexOf(v)===i)
+      .slice(0,3);
+    options = shuffle([correctOption, ...distractors]);
+  }
+  else if(mode === 'definitionToTerm'){
+    prompt = `¿A qué término corresponde esta definición?\n\n"${escapeHtml(cleanDef)}"`;
+    correctOption = correct.term;
+    const distractors = shuffle(others)
+      .map(o => o.term)
+      .filter(Boolean)
+      .slice(0,3);
+    options = shuffle([correctOption, ...distractors]);
+  }
+  else if(mode === 'exampleToTerm'){
+    prompt = `Observa el ejemplo:\n\n"${escapeHtml(cleanExample)}"\n\n¿A qué concepto corresponde?`;
+    correctOption = correct.term;
+    const distractors = shuffle(others)
+      .map(o => o.term)
+      .filter(Boolean)
+      .slice(0,3);
+    options = shuffle([correctOption, ...distractors]);
+  }
+  else if(mode === 'fullToTerm'){
+    prompt = `¿Qué concepto corresponde a este significado?\n\n"${escapeHtml(cleanFull)}"`;
+    correctOption = correct.term;
+    const distractors = shuffle(others)
+      .map(o => o.term)
+      .filter(Boolean)
+      .slice(0,3);
+    options = shuffle([correctOption, ...distractors]);
+  }
+
+  if(!correctOption || options.length < 2) return null;
+
+  // Conservar exactamente 4 opciones cuando hay suficientes conceptos.
+  // Si el bloque es pequeño, se usan las opciones disponibles.
+  return {
+    prompt,
+    options,
+    correctOption,
+    source: 'seed_data',
+    termId: correct.id,
+    mode
+  };
+}
+
+function buildAutoQuestions(pool){
+  const result = [];
+
+  pool.forEach(entry => {
+    const hasExample = normalizeQuestionText(entry.example).length > 0;
+    const hasFull = normalizeQuestionText(entry.full).length > 0;
+
+    // Cada tarjeta obtiene siempre una pregunta desde su definición.
+    const direct = makeAutoQuestion(entry, pool, 'termToDefinition');
+    if(direct) result.push(direct);
+
+    // Segunda forma de preguntar: definición -> término.
+    const inverse = makeAutoQuestion(entry, pool, 'definitionToTerm');
+    if(inverse) result.push(inverse);
+
+    // El ejemplo también puede alimentar el quiz sin necesidad de editar QUESTION_BANK.
+    if(hasExample){
+      const exampleQ = makeAutoQuestion(entry, pool, 'exampleToTerm');
+      if(exampleQ) result.push(exampleQ);
     }
-    return { prompt, options, correctOption };
+
+    // Cuando existe un significado completo de la sigla, se añade otra variante.
+    if(hasFull){
+      const fullQ = makeAutoQuestion(entry, pool, 'fullToTerm');
+      if(fullQ) result.push(fullQ);
+    }
   });
 
-  // 2. Generar preguntas desde el banco fijo
+  return result;
+}
+
+function questionKey(q){
+  return `${q.termId || ''}|${q.mode || ''}|${normalizeQuestionText(q.prompt)}`;
+}
+
+function buildQuiz(){
+  const pool = filteredEntries();
+  const fixedPool = QUESTION_BANK.filter(q =>
+    selectedModules.size === 0 || selectedModules.has(q.module)
+  );
+
+  if(pool.length < 2 && fixedPool.length === 0){
+    quizQuestions = [];
+    quizIndex = 0;
+    quizScore = 0;
+    quizAnswered = false;
+    quizFinished = false;
+    return;
+  }
+
+  // 1. Las tarjetas/seed_data generan automáticamente preguntas.
+  //    Esto hace que añadir un nuevo concepto a SEED_DATA sea suficiente para
+  //    que también pueda entrar en el quiz.
+  const autoQuestions = buildAutoQuestions(pool);
+
+  // 2. QUESTION_BANK sigue existiendo para preguntas manuales más específicas.
   const fixedQuestions = fixedPool.map(fq => {
     const otherFixed = fixedPool.filter(o => o.q !== fq.q);
-    const distractors = shuffle(otherFixed).slice(0, 3).map(o => o.a);
-    
-    while(distractors.length < 3) {
-      const fallback = shuffle(pool)[0];
-      if (fallback) distractors.push(fallback.definition);
-      else distractors.push("Opción incorrecta autogenerada");
+    let distractors = shuffle(otherFixed)
+      .map(o => o.a)
+      .filter(Boolean)
+      .filter((v,i,a)=>a.indexOf(v)===i)
+      .slice(0,3);
+
+    // Completar distractores con conceptos de seed_data si el banco manual
+    // no tiene suficientes respuestas alternativas.
+    if(distractors.length < 3){
+      const fallback = shuffle(pool)
+        .map(e => normalizeQuestionText(e.definition))
+        .filter(Boolean)
+        .filter(v => normalizeQuestionText(v) !== normalizeQuestionText(fq.a))
+        .filter((v,i,a)=>a.indexOf(v)===i);
+      for(const value of fallback){
+        if(distractors.length >= 3) break;
+        if(!distractors.includes(value)) distractors.push(value);
+      }
     }
-    
+
     return {
       prompt: fq.q,
       correctOption: fq.a,
-      options: shuffle([fq.a, ...distractors.slice(0, 3)])
+      options: shuffle([fq.a, ...distractors.slice(0,3)]),
+      source: 'QUESTION_BANK'
     };
   });
 
-  // 3. Combinar y seleccionar aleatoriamente 10 preguntas
-  const combined = shuffle([...autoQuestions, ...fixedQuestions]);
+  // 3. Mezclar sin duplicar preguntas idénticas.
+  const unique = new Map();
+  [...autoQuestions, ...fixedQuestions].forEach(q => {
+    const key = `${normalizeQuestionText(q.prompt)}|${normalizeQuestionText(q.correctOption)}`;
+    if(!unique.has(key)) unique.set(key, q);
+  });
+
+  // 4. El quiz sigue teniendo 10 preguntas, pero ahora la población incluye
+  //    todos los conceptos actuales de seed_data + las preguntas manuales.
+  const combined = shuffle([...unique.values()]);
   const n = Math.min(combined.length, 10);
   quizQuestions = combined.slice(0, n);
 
-  quizIndex = 0; quizScore = 0; quizAnswered = false; quizFinished = false;
+  quizIndex = 0;
+  quizScore = 0;
+  quizAnswered = false;
+  quizFinished = false;
 }
-
 function renderQuizHtml(){
   if(quizQuestions.length===0 && filteredEntries().length < 2 && QUESTION_BANK.length === 0){
     return `<div class="empty">Necesitas al menos 2 conceptos en este bloque para hacer un quiz.</div>`;
